@@ -1,28 +1,44 @@
 from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import RequestEntityTooLarge
 import os
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "a1b2ppp"
 app.config["UPLOAD_FOLDER"] = ""
+app.config["MAX_CONTENT_LENGTH"] = 4 * 1024 * 1024 #4MB
+app.config["ALLOWED_EXTENSIONS"] = [".json"]
 
-@app.route("/")
-def welcome():
-    return "Welcome stranger"
 
-@app.route("/upload", methods=["POST", "GET"])
+@app.route("/", methods=["POST", "GET"])
 def upload_file():
     # Check if a file was uploaded
-    if "file" not in request.files:
-        return "No file was uploaded"
+    if request.method == "POST":
+        if "file" not in request.files:
+            return "No file was uploaded"
+        try:
+            file = request.files["file"]
+            extension = os.path.splitext(file.filename)[1]
+            
+            if file:
+                if extension not in app.config["ALLOWED_EXTENSIONS"]:
+                    return ".json is the only allowed file extension"
 
-    file = request.files["file"]
+                else:
+                    filename = secure_filename(file.filename)
+                    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                    return "File uploaded successfully"
+        
+        except RequestEntityTooLarge:
+            return "The file size is too large"
+            
+
 
     # Check if the file has a valid filename
-    if file.filename == "":
-        return "Please select a file"
+        if file.filename == "":
+            return "Please select a file"
 
     # Save the file to the server
-    filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-    return "File uploaded successfully"
+        
+    else:
+        return render_template("index.html")

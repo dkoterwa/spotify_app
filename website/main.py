@@ -26,12 +26,14 @@ def upload_file():
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
                     read_file(file.filename)
+                    name = request.form.get('text')
                     #print(f"xddddd {file.filename}")
-                    return "File uploaded successfully"
-        
+                    #return "File uploaded successfully"
+                    return f"Hi {name}"
+
         except RequestEntityTooLarge:
-            return "The file size is too large"
-            
+           return "The file size is too large"
+
 
 
     # Check if the file has a valid filename

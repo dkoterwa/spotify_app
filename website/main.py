@@ -2,6 +2,7 @@ from __init__ import create_app
 from flask import Flask, render_template, request
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
+from read_db import read_file
 from datetime import datetime
 import os
 
@@ -24,6 +25,8 @@ def upload_file():
                 else:
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                    read_file(file.filename)
+                    #print(f"xddddd {file.filename}")
                     return "File uploaded successfully"
         
         except RequestEntityTooLarge:

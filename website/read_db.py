@@ -1,7 +1,12 @@
-
 import json
 import sqlite3
 from flask import Flask, render_template, request
+import uuid
+
+def generate_uuid():
+  return str(uuid.uuid4())
+
+
 
 def read_file(file):
 
@@ -12,16 +17,18 @@ def read_file(file):
     cursor = conn.cursor()
 
     # Execute a SELECT statement
-    cursor.execute('Create Table if not exists Tracks (trackName Text, artistName Text, albumName Text, trackUri Text)')
     traffic = json.load(open(file))
-    columns = ['trackName','artistName','albumName','trackUri']
-    for playlist in traffic['playlists']:
-        for item in playlist['items']:
-            row = item["track"]
-            keys= tuple(row[c] for c in columns)
-            cursor.execute('insert into Tracks values(?,?,?,?)',keys)
+
+    unique_id = generate_uuid()
+    
+    for record in traffic:     
+        cursor.execute('INSERT INTO Streaming_data values(?,?,?,?,?)',[unique_id,
+                                                                       record["endTime"], 
+                                                                       record["artistName"], 
+                                                                       record["trackName"], 
+                                                                       record["msPlayed"]])
     #find you favourite artist
-    # cursor.execute('SELECT artistName FROM Tracks GROUP BY artistName ORDER BY COUNT(*) DESC LIMIT 1;')
-    # fav_artist = cursor.fetchall()
+    #cursor.execute('SELECT artistName FROM Tracks GROUP BY artistName ORDER BY COUNT(*) DESC LIMIT 1;')
+    #fav_artist = cursor.fetchall()
     return cursor
 

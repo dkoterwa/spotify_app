@@ -30,7 +30,7 @@ def upload_file():
                     #print(f"xddddd {file.filename}")
                     #return "File uploaded successfully"
                     #return f"Hi {name}"
-                    cursor.execute('SELECT artistName FROM Tracks GROUP BY artistName ORDER BY COUNT(*) DESC LIMIT 1;')
+                    cursor.execute('SELECT artist_name FROM Streaming_data GROUP BY artist_name ORDER BY COUNT(*) DESC LIMIT 1;')
                     fav_artist = cursor.fetchall()
                     return render_template("home.html", name=name, fav_artist=fav_artist)
         except RequestEntityTooLarge:

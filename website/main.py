@@ -25,12 +25,14 @@ def upload_file():
                 else:
                     filename = secure_filename(file.filename)
                     file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                    read_file(file.filename)
+                    cursor = read_file(file.filename)
                     name = request.form.get('text')
                     #print(f"xddddd {file.filename}")
                     #return "File uploaded successfully"
                     #return f"Hi {name}"
-                    return render_template("home.html", name=name)
+                    cursor.execute('SELECT artistName FROM Tracks GROUP BY artistName ORDER BY COUNT(*) DESC LIMIT 1;')
+                    fav_artist = cursor.fetchall()
+                    return render_template("home.html", name=name, fav_artist=fav_artist)
         except RequestEntityTooLarge:
            return "The file size is too large"
 

@@ -1,6 +1,7 @@
 
 import json
 import sqlite3
+from flask import Flask, render_template, request
 
 def read_file(file):
 
@@ -19,9 +20,8 @@ def read_file(file):
             row = item["track"]
             keys= tuple(row[c] for c in columns)
             cursor.execute('insert into Tracks values(?,?,?,?)',keys)
-            #print(f'{row["trackName"]} data inserted Succefully')
-
-    # cursor.execute("SELECT trackName FROM Tracks")
-    # print(cursor.fetchall())
-    return
+    #find you favourite artist
+    # cursor.execute('SELECT artistName FROM Tracks GROUP BY artistName ORDER BY COUNT(*) DESC LIMIT 1;')
+    # fav_artist = cursor.fetchall()
+    return cursor
 

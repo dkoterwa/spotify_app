@@ -29,8 +29,8 @@ def upload_file():
                     name = request.form.get('text')
                     #print(f"xddddd {file.filename}")
                     #return "File uploaded successfully"
-                    return f"Hi {name}"
-
+                    #return f"Hi {name}"
+                    return render_template("home.html", name=name)
         except RequestEntityTooLarge:
            return "The file size is too large"
 

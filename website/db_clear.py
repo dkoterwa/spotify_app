@@ -7,7 +7,7 @@ conn = sqlite3.connect("spotify_db.db")
 cursor = conn.cursor()
 
 # Clear the table
-cursor.execute("DELETE FROM Users")
+cursor.execute("DELETE FROM Streaming_data")
 
 # Commit the changes to the database
 conn.commit()

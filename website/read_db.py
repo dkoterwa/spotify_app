@@ -6,7 +6,7 @@ import uuid
 def generate_uuid():
   return str(uuid.uuid4())
 
-def read_file(file):
+def read_file(file, unique_id):
 
     # Connect to the database
     conn = sqlite3.connect("spotify_db.db")
@@ -16,8 +16,6 @@ def read_file(file):
 
     # Execute a SELECT statement
     traffic = json.load(open(file))
-
-    unique_id = generate_uuid()
     
     # Upload records
     for record in traffic:     
@@ -31,4 +29,17 @@ def read_file(file):
 
     # Close the connection to the database
     return cursor
+
+def upload_user(unique_id, name, age):
+  # Connect to the database
+  conn = sqlite3.connect("spotify_db.db")
+  # Create a cursor
+  cursor = conn.cursor()
+  #Upload user
+  cursor.execute('INSERT INTO Users values (?,?,?)', [unique_id,
+                                                      name,
+                                                      age])
+  conn.commit()
+
+
 

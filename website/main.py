@@ -1,5 +1,5 @@
 from __init__ import create_app
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from read_db import read_file, generate_uuid, upload_user
@@ -10,8 +10,9 @@ import uuid
 app = create_app()
 
 @app.route("/", methods=["POST", "GET"])
-def upload_file():
 
+def upload_file():
+    
     if request.method == "POST":
 
         files = request.files.getlist("file")

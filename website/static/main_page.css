@@ -1,0 +1,40 @@
+@charset "UTF-8";
+body {
+    margin: 0;
+    padding: 0;
+    color: white;
+    background: linear-gradient(to right, #232623, #686857);
+  }
+  
+  label, input {
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  input[type="submit"] {
+    clear: both;
+  }
+  
+  .margin{
+    margin-top: 100px;
+
+  }
+  .center {
+    margin: auto;
+    width: 50%;
+  }
+  
+  form {
+    margin: auto;
+    width: 50%;
+  }
+  
+  input[type="text"] {
+    text-align: center;
+  }
+  
+  button {
+    display: block;
+    margin: auto;
+  }
+  

@@ -6,16 +6,20 @@
   <title>File Upload</title>
 </head>
 <body>
-  <h1>File Upload</h1>
-  <form action="/" method="POST" enctype="multipart/form-data">
-    <label for="file">Upload your files</label>
-    <input type="file" name="file" id="file" multiple>
-    <label for="name">Enter your name:</label>
-    <input id="name" type="text" name="name"/>
-    <label for="age">Enter your age:</label>
-    <input id="age" type="text" name="age"/>
-    <input type="submit" value="Upload">
-  </form>
+  <div class="main">
+    <div class="wrapper"> 
+      <h1>Custom Spotify Wrapped</h1>
+      <form action="/" method="POST" enctype="multipart/form-data">
+        <label for="file">Upload your files</label>
+        <input type="file" name="file" id="file" multiple>
+        <label for="name">Enter your name:</label>
+        <input id="name" type="text" name="name"/>
+        <label for="age">Enter your age:</label>
+        <input id="age" type="text" name="age"/>
+        <input type="submit" value="Create">
+      </form>
+    </div>
+  </div>
   
 
 </body>

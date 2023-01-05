@@ -45,5 +45,13 @@ def upload_file():
     else:
         return render_template("index.html")
 
+@app.route('/detailed-info')
+def detailed_info():
+    return render_template('detailed_information.html')
+
+@app.route('/recommendations')
+def recommendations():
+    return render_template('recommendations.html')
+
 if __name__ == "__main__":
     app.run(debug=True)

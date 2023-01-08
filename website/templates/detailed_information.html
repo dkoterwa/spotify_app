@@ -1,17 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+<style>
+</style>
 <head>
     <link rel="stylesheet" type="text/css" href="static/detailed_information.css">
     <meta charset="UTF-8">
     <title>home</title>
 </head>
-<body>
+<body style="color:white;text-align:center;">
     {% include "navbar.html" %}
     <div id="title">
         Detailed information
     </div>
-<img src=templates/fig1.jpg">
 <a>
+    <img src=templates/fig1.jpg" alt="Plot" class="center">
     Your song with the highest:
     {% for item in song_stats %}
     <ul>

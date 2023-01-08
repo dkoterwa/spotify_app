@@ -4,9 +4,13 @@ body {
     color: white;
     background: linear-gradient(to right, #232623, #686857);
     left: 50%;
+    margin-top: 500px
     
 }
-
+ul {
+  background: #000000;
+  padding: 20px;
+}
 .navbar {
     position: absolute;
     top: 15%;
@@ -15,7 +19,10 @@ body {
     display: flex;
     align-items: center;
   }
-
+.center {
+    position: center;
+    padding: 20px;
+}
 #title {
     position: absolute;
     top: 10%;

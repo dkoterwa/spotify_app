@@ -4,11 +4,11 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from read_db import read_file, generate_uuid, upload_user
 from datetime import datetime
+from detailed_statistics import *
 import os
 import uuid
 
 app = create_app()
-
 @app.route("/", methods=["POST", "GET"])
 
 def upload_file():
@@ -47,7 +47,18 @@ def upload_file():
 
 @app.route('/detailed-info')
 def detailed_info():
-    return render_template('detailed_information.html')
+    song_stats=get_song_stats()
+    make_plot()
+    song1 = song_stats[1]
+    descriptions = [
+        "dancebility",
+        "energy",
+        "acoustniess",
+        "instrumentalness",
+        "loudness"
+    ]
+    song_formatted = [f" {descr} being {song2} is {song1}" for (song1, song2), descr in zip(song_stats, descriptions)]
+    return render_template('detailed_information.html', song_stats=song_formatted, song1=song1)
 
 @app.route('/recommendations')
 def recommendations():

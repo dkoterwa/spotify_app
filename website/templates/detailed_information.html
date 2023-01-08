@@ -10,5 +10,14 @@
     <div id="title">
         Detailed information
     </div>
+<img src=templates/fig1.jpg">
+<a>
+    Your song with the highest:
+    {% for item in song_stats %}
+    <ul>
+      <li>{{item}}</li>
+    </ul>
+{% endfor %}
+</a>
 </body>
 </html>

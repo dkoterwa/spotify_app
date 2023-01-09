@@ -1,10 +1,5 @@
 @charset "UTF-8";
-styledimg {
-background-image: url(fig1.jpg);
-background-repeat: no-repeat;
-width: 10px;
-height: 20px;
-}
+
 body {
     color: white;
     background: linear-gradient(to right, #232623, #686857);

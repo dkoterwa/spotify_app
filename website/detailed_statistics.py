@@ -46,10 +46,6 @@ def make_plot():
           theta = ["danceability", "energy", "accousticness", "instrumentalness", "loudness","danceability"],
         line_color="green",
         ), 1, 1)
-
-
-
-
     fig.update_traces(fill='toself')
     fig.update_layout(
         polar = dict(
@@ -59,6 +55,6 @@ def make_plot():
             period = 6)
         ),
     )
-    fig.write_image("templates/fig1.webp")
+    fig.write_image("static/fig1.png")
     return 0
 #fig.show()

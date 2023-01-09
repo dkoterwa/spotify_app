@@ -39,22 +39,25 @@ def get_song_stats():
 def make_plot():
     stats = get_user_stats()
     stats = stats + stats
-    fig = make_subplots(rows=2, cols=2, specs=[[{'type': 'polar'}]*2]*2)
-    fig.add_trace(go.Scatterpolar(
+    #fig = make_subplots(rows=1, cols=1, specs=[[{'type': 'polar'}]*2]*2)
+
+    #fig.add_trace\
+    fig = go.Figure(go.Scatterpolar(
           name = "Your songs with highest:",
           r = stats,
           theta = ["danceability", "energy", "accousticness", "instrumentalness", "loudness","danceability"],
         line_color="green",
-        ), 1, 1)
-    fig.update_traces(fill='toself')
+        fill="tonext"
+    ))
+   # fig.update_traces(fill='toself')
     fig.update_layout(
         polar = dict(
-          #radialaxis_angle = -45,
-          angularaxis = dict(
-            direction = "clockwise",
-            period = 6)
-        ),
-    )
+        bgcolor="rgb(223, 223, 223)",
+        radialaxis_angle = -45,
+         angularaxis = dict(
+        direction = "clockwise",
+        period = 6)
+    ))
     fig.write_image("static/fig1.png")
     return 0
 #fig.show()

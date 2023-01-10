@@ -3,11 +3,11 @@ import sqlite3
 from flask import Flask, render_template, request
 import uuid
 
+
 def generate_uuid():
   return str(uuid.uuid4())
 
 def read_file(file, unique_id):
-
     # Connect to the database
     conn = sqlite3.connect("spotify_db.db")
 
@@ -40,6 +40,5 @@ def upload_user(unique_id, name, age):
                                                       name,
                                                       age])
   conn.commit()
-
 
 

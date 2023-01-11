@@ -1,5 +1,5 @@
 from __init__ import create_app
-from flask import Flask, render_template, request, send_from_directory
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from read_db import read_file, generate_uuid, upload_user
@@ -7,6 +7,9 @@ from datetime import datetime
 from detailed_statistics import *
 import os
 import uuid
+import json
+import plotly
+import plotly.express as px
 
 app = create_app()
 @app.route("/", methods=["POST", "GET"])
@@ -31,19 +34,23 @@ def upload_file():
                 else:
                     try:
                         filename = secure_filename(f.filename)
-                        f.save(os.path.join(app.config["UPLOAD_FOLDER"], filename)) # Save file
                         cursor = read_file(f.filename, unique_id) # Upload file to database
-                        name = request.form.get("name")
                     except RequestEntityTooLarge:
                             return "The file size is too large"
                     except Exception as e:
                         print("Error: ", e)
 
-        cursor.execute('SELECT artist_name FROM Streaming_data GROUP BY artist_name ORDER BY COUNT(*) DESC LIMIT 1;')
-        fav_artist = cursor.fetchall()
-        return render_template("home.html", name=name, fav_artist=fav_artist)
+        return redirect(url_for("general_statistics"))
     else:
         return render_template("index.html")
+
+@app.route('/general_statistics')
+def general_statistics():
+    df = px.data.medals_wide()
+    fig1 = px.bar(df, x="nation", y=["gold", "silver", "bronze"])
+    graph1JSON = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template("general_statistics.html", graph1JSON=graph1JSON)
 
 @app.route('/detailed-info')
 def detailed_info():

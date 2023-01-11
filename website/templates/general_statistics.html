@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="static/general_statistics.css">
+    <meta charset="UTF-8">
+    <title>home</title>
+</head>
+<body>
+    {% include "navbar.html" %}
+    <div id="title">
+        Hi {{name}}!
+        This is your Spotify Wrapup made by us!
+    </div>
+{% block content %}
+
+<div id="chart1"> </div> 
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script>
+    var graph1 = {{ graph1JSON | safe }};
+    Plotly.plot("chart1", graph1, {})
+</script>
+{% endblock %}   
+</body>
+</html>

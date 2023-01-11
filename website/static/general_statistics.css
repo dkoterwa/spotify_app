@@ -58,3 +58,9 @@ button[name = "recommendations"]{
     border-bottom-left-radius: 0%;
     border-style: solid;
 }
+
+#chart1{
+    position: absolute;
+    left: 10px;
+    top: 20%;
+}

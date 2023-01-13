@@ -15,7 +15,7 @@ def read_file(file, unique_id):
     cursor = conn.cursor()
 
     # Execute a SELECT statement
-    traffic = json.load(open(file))
+    traffic = json.loads(file.read())
     
     # Upload records
     for record in traffic:     
@@ -28,7 +28,7 @@ def read_file(file, unique_id):
     conn.commit()
 
     # Close the connection to the database
-    return cursor
+    conn.close()
 
 def upload_user(unique_id, name, age):
   # Connect to the database
@@ -40,5 +40,6 @@ def upload_user(unique_id, name, age):
                                                       name,
                                                       age])
   conn.commit()
+  conn.close()
 
 

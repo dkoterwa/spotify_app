@@ -61,6 +61,16 @@ button[name = "recommendations"]{
 
 #chart1{
     position: absolute;
-    left: 10px;
-    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    top: 60%;
+}
+
+#chart2{
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    top: 140%;
 }

@@ -1,10 +1,12 @@
 from __init__ import create_app
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from read_db import read_file, generate_uuid, upload_user
 from datetime import datetime
 from detailed_statistics import *
+from song_characteristics import *
+from plots import *
 import os
 import uuid
 import json
@@ -13,20 +15,20 @@ import plotly.express as px
 
 app = create_app()
 @app.route("/", methods=["POST", "GET"])
-
 def upload_file():
     
     if request.method == "POST":
 
         files = request.files.getlist("file")
-        unique_id = generate_uuid()
+        session["unique_id"] = generate_uuid()
         user_name = request.form["name"]
         user_age = request.form["age"]
-        upload_user(unique_id, user_name, user_age)
+        upload_user(session["unique_id"], user_name, user_age)
 
         for f in files: 
             if not f.filename: # Check if user uploaded any file
                 return "No file was uploaded"
+            
             extension = os.path.splitext(f.filename)[1]
             if f:
                 if extension not in app.config["ALLOWED_EXTENSIONS"]: # Check extension
@@ -34,7 +36,7 @@ def upload_file():
                 else:
                     try:
                         filename = secure_filename(f.filename)
-                        cursor = read_file(f.filename, unique_id) # Upload file to database
+                        cursor = read_file(f, session["unique_id"]) # Upload file to database
                     except RequestEntityTooLarge:
                             return "The file size is too large"
                     except Exception as e:
@@ -46,11 +48,14 @@ def upload_file():
 
 @app.route('/general_statistics')
 def general_statistics():
-    df = px.data.medals_wide()
-    fig1 = px.bar(df, x="nation", y=["gold", "silver", "bronze"])
-    graph1JSON = json.dumps(fig1, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return render_template("general_statistics.html", graph1JSON=graph1JSON)
+    user_id = session.get("unique_id")
+    conn, cursor = db_connect("spotify_db.db")
+    data = download_data(user_id, cursor)
+    scatter = make_general_scatter(data)
+    heatmap = make_general_heatmap(data)
+    graph1JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder)
+    graph2JSON = json.dumps(heatmap, cls=plotly.utils.PlotlyJSONEncoder)
+    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON)
 
 @app.route('/detailed-info')
 def detailed_info():

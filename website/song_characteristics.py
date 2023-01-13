@@ -24,7 +24,16 @@ def download_data(user_id, cursor):
     data = cursor.fetchall()
     data_df = pd.DataFrame(data, columns=["end_time", "artist_name", "song_name", "ms_played"])
     data_df = data_df[data_df["end_time"].str.startswith("2022")]
-    data_df = data_df.drop_duplicates(subset=['song_name'])
+    return data_df
+
+def download_data_for_characteristics(user_id, cursor):
+
+    query = "SELECT end_time, artist_name, song_name, ms_played FROM Streaming_data WHERE UserID == '{}'".format(user_id)
+    cursor.execute(query)
+    data = cursor.fetchall()
+    data_df = pd.DataFrame(data, columns=["end_time", "artist_name", "song_name", "ms_played"])
+    data_df = data_df[data_df["end_time"].str.startswith("2022")]
+    data_df = data_df.drop_duplicates("song_name")
     data_df = data_df.head(int(len(data_df) * 0.5))
     return data_df
 

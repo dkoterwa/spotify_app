@@ -20,6 +20,14 @@
     var graph1 = {{ graph1JSON | safe }};
     Plotly.plot("chart1", graph1, {})
 </script>
+
+<div id="chart2"> </div> 
+
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script>
+    var graph2 = {{ graph2JSON | safe }};
+    Plotly.plot("chart2", graph2, {})
+</script>
 {% endblock %}   
 </body>
 </html>

@@ -7,6 +7,7 @@ from datetime import datetime
 from detailed_statistics import *
 from song_characteristics import *
 from plots import *
+from webscrapping import *
 import os
 import uuid
 import json
@@ -56,8 +57,9 @@ def general_statistics():
     graph1JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder)
     graph2JSON = json.dumps(heatmap, cls=plotly.utils.PlotlyJSONEncoder)
     total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening = get_general_statistics(data)
-                                                     
-    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON, total_listening_time = total_listening_time, favorite_artists = favorite_artists, favorite_songs = favorite_songs, distinct_artists = distinct_artists, distinct_songs = distinct_songs, favorite_artists_minutes = favorite_artists_minutes, favorite_artist_fraction = favorite_artist_fraction, favorite_songs_of_fav_artist = favorite_songs_of_fav_artist, number_of_songs_by_fav_artist = number_of_songs_by_fav_artist, favorite_morning = favorite_morning, favorite_evening = favorite_evening)
+
+    fav_artist_link = [get_main_wiki_image(i) for i in favorite_artists["artist_name"][:5]]
+    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON, total_listening_time = total_listening_time, favorite_artists = favorite_artists, favorite_songs = favorite_songs, distinct_artists = distinct_artists, distinct_songs = distinct_songs, favorite_artists_minutes = favorite_artists_minutes, favorite_artist_fraction = favorite_artist_fraction, favorite_songs_of_fav_artist = favorite_songs_of_fav_artist, number_of_songs_by_fav_artist = number_of_songs_by_fav_artist, favorite_morning = favorite_morning, favorite_evening = favorite_evening, fav_artist_link=fav_artist_link, zip=zip)
 
 @app.route('/detailed-info')
 def detailed_info():

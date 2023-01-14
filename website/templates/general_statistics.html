@@ -36,7 +36,7 @@
         <div class="favorite-artists-title">Favorite Artists</div>
         <div class="favorite-artists">
             {% for (artist, image) in zip(favorite_artists["artist_name"][:5], fav_artist_link[:5]) %}
-             <img src="https://{{image}}" alt="{{image}}" />
+             <img src="{{image}}" alt="{{image}}" />
                 <div class="favorite-artist">
                     <h3>{{ artist }}</h3>
                 </div>

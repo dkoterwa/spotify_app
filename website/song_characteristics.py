@@ -37,6 +37,31 @@ def download_data_for_characteristics(user_id, cursor):
     data_df = data_df.head(int(len(data_df) * 0.5))
     return data_df
 
+def get_general_statistics(dataframe):
+    dataframe["min_played"] = dataframe["ms_played"]/60000
+    total_listening_time = dataframe["min_played"].sum().astype(int) # Total listening time
+    
+    favorite_artists = dataframe.groupby("artist_name")["artist_name"].size().reset_index(name="count").sort_values("count", ascending=False) # Favorite artists
+    favorite_songs = dataframe.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False) # Favorite songs
+    distinct_artists = len(dataframe.drop_duplicates("artist_name")) # Distinct artists
+    distinct_songs = len(dataframe.drop_duplicates("song_name")) # Distinct songs
+
+    # Stats for favorite artist
+    favorite_artists_minutes = dataframe.groupby("artist_name")["min_played"].sum().astype(int).reset_index(name="sum_of_minutes").sort_values("sum_of_minutes", ascending=False) # Minutes of favorite artists
+    favorite_artist_fraction = favorite_artists_minutes["sum_of_minutes"].iloc[0] / favorite_artists_minutes["sum_of_minutes"][1:].sum() # Percentage of minutes occupied by favorite artist
+    favorite_songs_of_fav_artist = favorite_songs[favorite_songs["artist_name"] == favorite_artists["artist_name"].iloc[0]] # Favorite songs of favorite artist
+    number_of_songs_by_fav_artist = len(favorite_songs_of_fav_artist) # Number of distinct songs of favorite artist listened
+
+    # Top morning and evening songs
+    dataframe["hour"] = pd.to_datetime(dataframe["end_time"]).dt.hour
+    dataframe_evening = dataframe[(dataframe["hour"].astype(int) > 19) | (dataframe["hour"].astype(int) < 5)]
+    dataframe_morning = dataframe[(dataframe["hour"].astype(int) > 5) & (dataframe["hour"].astype(int) < 10)]
+    favorite_evening = dataframe_evening.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False) # Favorite morning songs
+    favorite_morning = dataframe_morning.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False) # Favorite evening songs
+
+    return total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening
+
+
 def get_links(dataframe, sp):
 
     songs_links=[]

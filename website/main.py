@@ -55,7 +55,9 @@ def general_statistics():
     heatmap = make_general_heatmap(data)
     graph1JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder)
     graph2JSON = json.dumps(heatmap, cls=plotly.utils.PlotlyJSONEncoder)
-    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON)
+    total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening = get_general_statistics(data)
+                                                     
+    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON, total_listening_time = total_listening_time, favorite_artists = favorite_artists, favorite_songs = favorite_songs, distinct_artists = distinct_artists, distinct_songs = distinct_songs, favorite_artists_minutes = favorite_artists_minutes, favorite_artist_fraction = favorite_artist_fraction, favorite_songs_of_fav_artist = favorite_songs_of_fav_artist, number_of_songs_by_fav_artist = number_of_songs_by_fav_artist, favorite_morning = favorite_morning, favorite_evening = favorite_evening)
 
 @app.route('/detailed-info')
 def detailed_info():

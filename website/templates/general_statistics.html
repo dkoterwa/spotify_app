@@ -8,10 +8,89 @@
 <body>
     {% include "navbar.html" %}
     <div id="title">
-        Hi {{name}}!
+        Hi!
         This is your Spotify Wrapup made by us!
+        
     </div>
 {% block content %}
+
+<div class="container-listening-time">
+    <div class="total-listening-time">
+        <div class="listening-time">
+            <h3 class="listening-time-title">Total listening time</h3> <span class="total-time">{{ total_listening_time }} minutes</span> 
+        </div>
+    </div>
+</div>
+
+<div class="container-distinct-artists-songs">
+    <div class="distinct-songs-artists">
+        <div class="distinct-features">
+            <h3 class="distinct-info">You've listened to </h3> <span class="unique-artists">{{ distinct_artists }} </span> <span class="artists-text"> unique artists </span> <span class="and"> and </span> <span class="unique-songs"> {{ distinct_songs }}</span> <span class="songs-text"> unique songs! </span>
+        </div>
+    </div>
+</div>
+
+
+<div class="container-favorites">
+    <div class="favorite-artists-section">
+        <div class="favorite-artists-title">Favorite Artists</div>
+        <div class="favorite-artists">
+            {% for artist in favorite_artists["artist_name"][:5] %}
+                <div class="favorite-artist">
+                    <h3>{{ artist }}</h3>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="favorite-songs-section">
+        <div class="favorite-songs-title">Favorite Songs</div>
+        <div class="favorite-songs">
+            {% for position in favorite_songs[:5].itertuples() %}
+                <div class="favorite-song">
+                    <h3>{{ position["song_name"] }} by {{ position["artist_name"] }} (played {{ position["count"] }} times)</h3>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<div class="frame-morning">
+        <img src="{{ url_for('static', filename='morning_frame.png') }}" width="1250px" height="700px">
+</div>
+<div class="frame-evening">
+        <img src="{{ url_for('static', filename='evening_frame.png') }}" width="1250px" height="700px">
+</div>
+
+
+<div class="morning-block">
+    <div class="favorite-morning-songs text-center">
+        {% for position in favorite_morning[:5].itertuples() %}
+            <div class="favorite-song">
+                <h3>{{ position["song_name"] }} by {{ position["artist_name"] }}</h3>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="evening-block">
+    <div class="favorite-evening-songs text-center">
+        {% for position in favorite_evening[:5].itertuples() %}
+        <div class="favorite-song">
+            <h3>{{ position["song_name"] }} by {{ position["artist_name"] }}</h3>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+
+ <div class=morning-text>
+     <h3> Your favorite morning songs</h3>
+ </div>
+
+ <div class=evening-text>
+     <h3> Your favorite evening songs</h3>
+ </div>
+
 
 <div id="chart1"> </div> 
 

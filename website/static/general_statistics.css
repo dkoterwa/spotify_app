@@ -2,11 +2,10 @@
 
 body {
     color: white;
-    background: linear-gradient(to right, #232623, #686857);
+    background: linear-gradient(to right, #000000, #272725);
     left: 50%;
     
 }
-
 .navbar {
     position: absolute;
     top: 15%;
@@ -16,14 +15,7 @@ body {
     align-items: center;
   }
 
-#title {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-button[name = "general_statistics"]{
+  button[name = "general_statistics"]{
     width: 130px;
     height: 30px;
     color: rgb(255, 255, 255);
@@ -59,12 +51,174 @@ button[name = "recommendations"]{
     border-style: solid;
 }
 
+#title {
+    position: absolute;
+    color: white;
+    font-family: Futura;
+    font-size: 16px;
+    font-weight: bold;
+    top: 10%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.container-listening-time{
+    position: absolute;
+    overflow: hidden;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    width: 1200px;
+  }
+
+.listening-time-title {
+    font-family: Futura;
+    font-size: 62px;
+    display: inline;
+    margin-right: 30px;
+}
+
+.total-time {
+    color: rgb(29, 185, 84);
+    font-family: Futura;
+    font-size: 55px;
+    font-weight: bold;
+    display: inline;
+}
+
+.container-distinct-artists-songs {
+    position: absolute;
+    overflow: hidden;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    width: 1200px;
+}
+
+.distinct-info {
+    color: white;
+    font-family: Futura;
+    font-size: 35px;
+    display: inline;
+}
+
+.unique-artists, .unique-songs {
+    color: rgb(29, 185, 84);
+    font-family: Futura;
+    font-size: 35px;
+    font-weight: bold;
+    display: inline;
+}
+
+.and, .artists-text, .songs-text {
+    color: white;
+    font-family: Futura;
+    font-size: 35px;
+    font-weight: bold;
+    display: inline;
+}
+
+.container-favorites {
+    display: flex;
+    position: absolute;
+    overflow: hidden;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.favorite-artists-section {
+    color: white;
+    font-family: Futura;
+    font-size: 16px;
+    align-items: flex-end;
+    flex-direction: column-reverse;
+    margin-right: 150px;
+}
+
+.favorite-songs-section {
+    color: white;
+    font-family: Futura;
+    font-size: 16px;
+    align-items: flex-start;
+    flex-direction: column;
+    margin-left: 150px;
+}
+
+.favorite-artists-title, .favorite-songs-title {
+    color: rgb(226,114,91);
+    font-family: Futura;
+    font-size: 22px;
+    font-weight: bold;
+    align-items: flex-start;
+}
+
+
+.frame-morning {
+    position: absolute;
+    left: -15%;
+    top: 90%;
+}
+
+.frame-evening {
+    position: absolute;
+    right: -15%;
+    top: 90%;
+}
+
+.evening-block, .morning-block {
+    color: white;
+    font-family: Futura;
+    font-size: 15px;
+}
+
+.morning-block {
+    position: absolute;
+    top: 115%;
+    left: 12%;
+}
+
+.evening-block {
+    position: absolute;
+    top: 115%;
+    left: 55%;
+}
+
+.morning-text{
+    position: absolute;
+    top: 95%;
+    left: 15%;
+    color: rgb(234, 203, 0);
+    font-family: Futura;
+    font-size: 20px;
+}
+.evening-text{
+    position: absolute;
+    top: 95%;
+    right: 15%;
+    color: white;
+    font-family: Futura;
+    font-size: 20px;
+}
+
 #chart1{
     position: absolute;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 60%;
+    top: 350%;
 }
 
 #chart2{
@@ -72,5 +226,5 @@ button[name = "recommendations"]{
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 140%;
+    top: 380%;
 }

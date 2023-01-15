@@ -165,7 +165,6 @@ button[name = "recommendations"]{
     align-items: flex-start;
 }
 
-
 .frame-morning {
     position: absolute;
     left: -15%;
@@ -208,17 +207,96 @@ button[name = "recommendations"]{
     position: absolute;
     top: 95%;
     right: 15%;
-    color: white;
+    color: rgba(244, 241, 241, 0.78);
     font-family: Futura;
     font-size: 20px;
 }
+
+.scope-text {
+    position: absolute;
+    display: inline;
+    top: 170%; 
+    left: 50%; 
+    width: 100vw;
+    transform: translate(-50%, -50%); 
+    text-align: center; 
+    font-family: Futura;
+    font-size: 55px;
+    font-weight: bold;
+}
+
+.in-details {
+    display: inline;
+    color:rgb(218, 119, 215);
+}
+
+.favorite-artist-listening-time {
+    position: absolute;
+    top: 180%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+}
+    
+.favorite-artist-fraction {
+    position: absolute;
+    top: 190%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.favorite-artist-minutes, .fav-artist, .fraction-favorite, .fav-artist-minutes{
+    color: rgb(29, 185, 84);
+    font-family: Futura;
+    font-size: 30px;
+    font-weight: bold;
+    display: inline;
+}
+.favorite-minutes-text, .favorite-fraction-text, .listening-time-text, .account-for, .for{
+    color: white;
+    font-family: Futura;
+    font-size: 25px;
+    font-weight: bold;
+    display: inline;
+}
+
+.favorite-artist-title{
+    color:white;
+    font-family: Futura;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.name-favorite{
+    color:rgb(218, 119, 215);
+    font-family: Futura;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.favorite-artists-songs{
+    position: absolute;
+    overflow: hidden;
+    top: 210%;
+    left: 10%;
+}
+
 
 #chart1{
     position: absolute;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 350%;
+    top: 280%;
 }
 
 #chart2{
@@ -226,5 +304,5 @@ button[name = "recommendations"]{
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 380%;
+    top: 350%;
 }

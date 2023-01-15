@@ -7,8 +7,23 @@
 </head>
 <body>
     {% include "navbar.html" %}
-    <div id="title">
-        Recommendations
+<div id="title">
+    Recommendations
+</div>
+
+<div class="container-favorites">
+    <div class="favorite-artists-section">
+        <div class="favorite-artists-title">Favorite Artists</div>
+        <div class="favorite-artists">
+            {% for (artist, image) in zip(favorite_artists["artist_name"][:5], fav_artist_link[:5]) %}
+            <img src="{{image}}" alt="{{image}}" />
+             <div class="favorite-artist">
+                   <h3>{{ artist }}</h3>
+             </div>
+            {% endfor %}
+        </div>
     </div>
+</div>
+
 </body>
 </html>

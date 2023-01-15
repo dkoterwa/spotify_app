@@ -15,9 +15,11 @@ import plotly
 import plotly.express as px
 
 app = create_app()
+
+
 @app.route("/", methods=["POST", "GET"])
+
 def upload_file():
-    
     if request.method == "POST":
 
         files = request.files.getlist("file")
@@ -78,7 +80,12 @@ def detailed_info():
 
 @app.route('/recommendations')
 def recommendations():
-    return render_template('recommendations.html')
+    user_id = session.get("unique_id")
+    conn, cursor = db_connect("spotify_db.db")
+    data = download_data(user_id, cursor)
+    favorite_artists = get_general_statistics(data)[1]
+    fav_artist_link = [get_main_wiki_image(i) for i in favorite_artists["artist_name"][:5]]
+    return render_template('recommendations.html',favorite_artists = favorite_artists, fav_artist_link=fav_artist_link, zip=zip)
 
 if __name__ == "__main__":
     app.run(debug=True)

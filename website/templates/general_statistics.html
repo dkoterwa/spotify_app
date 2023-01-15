@@ -34,27 +34,22 @@
 <div class="container-favorites">
     <div class="favorite-artists-section">
         <div class="favorite-artists-title">Favorite Artists</div>
-        <div class="favorite-artists">
-            {% for (artist, image) in zip(favorite_artists["artist_name"][:5], fav_artist_link[:5]) %}
-             <img src="{{image}}" alt="{{image}}" />
-                <div class="favorite-artist">
-                    <h3>{{ artist }}</h3>
-                </div>
+        <div class="favorite-artist">
+            {% for i in range(5) %}
+            <h3>{{ i+1 }}. {{ favorite_artists["artist_name"].iloc[i] }}</h3>
             {% endfor %}
         </div>
     </div>
     <div class="favorite-songs-section">
         <div class="favorite-songs-title">Favorite Songs</div>
-        <div class="favorite-songs">
-            {% for position in favorite_songs[:5].itertuples() %}
-                <div class="favorite-song">
-                    <h3>{{ position["song_name"] }} by {{ position["artist_name"] }} (played {{ position["count"] }} times)</h3>
-                </div>
+        <div class="favorite-song">
+            {% for i in range(5) %}
+            <h3>{{ i+1 }}. {{ favorite_songs["song_name"].iloc[i] }} by {{ favorite_songs["artist_name"].iloc[i] }} (played {{ favorite_songs["count"].iloc[i] }} times)</h3>
             {% endfor %}
         </div>
+        
     </div>
 </div>
-
 
 <div class="frame-morning">
         <img src="{{ url_for('static', filename='morning_frame.png') }}" width="1250px" height="700px">
@@ -63,24 +58,23 @@
         <img src="{{ url_for('static', filename='evening_frame.png') }}" width="1250px" height="700px">
 </div>
 
-
 <div class="morning-block">
     <div class="favorite-morning-songs text-center">
-        {% for position in favorite_morning[:5].itertuples() %}
-            <div class="favorite-song">
-                <h3>{{ position["song_name"] }} by {{ position["artist_name"] }}</h3>
-            </div>
-        {% endfor %}
+        <div class="favorite-song">
+            {% for i in range(5) %}
+            <h3>{{ i+1 }}. {{ favorite_morning["song_name"].iloc[i] }} by {{ favorite_morning["artist_name"].iloc[i] }}</h3>
+            {% endfor %}
+        </div>       
     </div>
 </div>
 
 <div class="evening-block">
     <div class="favorite-evening-songs text-center">
-        {% for position in favorite_evening[:5].itertuples() %}
+        {% for i in range(5) %}
         <div class="favorite-song">
-            <h3>{{ position["song_name"] }} by {{ position["artist_name"] }}</h3>
+            <h3>{{ i+1 }}. {{ favorite_evening["song_name"].iloc[i] }} by {{ favorite_evening["artist_name"].iloc[i] }}</h3>
         </div>
-    {% endfor %}
+        {% endfor %}
     </div>
 </div>
 
@@ -92,9 +86,32 @@
      <h3> Your favorite evening songs</h3>
  </div>
 
+ <div class="scope-text">Your favorite artist <span class="in-details">in details</span></div>
+
+<div class="favorite-artist-listening-time">
+    <div class="favorite-listening-time">
+        <h3 class="favorite-minutes-text">You've listened to </h3> <span class="fav-artist">{{ favorite_artists["artist_name"].iloc[0] }} </span> <span class="for"> for </span> <span class="fav-artist-minutes">{{ favorite_artists_minutes["sum_of_minutes"].iloc[0] }} minutes!</span> 
+    </div>
+</div>
+
+<div class="favorite-artist-fraction">
+    <div class="listening-time-fraction">
+        <h3 class="favorite-fraction-text"> Songs by </h3> <span class="fav-artist">{{ favorite_artists["artist_name"].iloc[0] }} </span> <span class="account-for"> account for </span> <span class="fraction-favorite"> {{ favorite_artist_fraction }}% </span> <span class = "listening-time-text"> of your total listening time!</span>
+    </div>
+</div>
+
+<div class="favorite-artists-songs">
+    <div class="favorite-artist-title">Your favorite songs by <span class="name-favorite"> {{ favorite_artists["artist_name"].iloc[0] }}</span></div>
+    <div class="favorite-artist-songs">
+        {% for i in range(5) %}
+        <h3>{{ i+1 }}. {{ favorite_songs_of_fav_artist["song_name"].iloc[i] }} (played {{ favorite_songs_of_fav_artist["count"].iloc[i] }} times) </h3>
+        {% endfor %}
+    </div>
+</div>
+
+
 
 <div id="chart1"> </div> 
-
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script>
     var graph1 = {{ graph1JSON | safe }};
@@ -102,7 +119,6 @@
 </script>
 
 <div id="chart2"> </div> 
-
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script>
     var graph2 = {{ graph2JSON | safe }};

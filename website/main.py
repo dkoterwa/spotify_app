@@ -3,11 +3,14 @@ from flask import Flask, render_template, request, send_from_directory, redirect
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from read_db import read_file, generate_uuid, upload_user
+from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy
 from datetime import datetime
 from detailed_statistics import *
 from song_characteristics import *
 from plots import *
 from webscrapping import *
+from spot_secrets import *
 import os
 import uuid
 import json
@@ -65,6 +68,17 @@ def general_statistics():
 
 @app.route('/detailed-info')
 def detailed_info():
+
+    user_id = session.get("unique_id")
+    conn, cursor = db_connect("spotify_db.db")
+    data = download_data_for_characteristics(user_id, cursor)
+
+    sp = connect_to_sp(cid, secret)
+    df_links = get_links(data, sp)
+    features = get_features(data, "song_url", sp)
+    data_prep = prepare_to_upload(df_links, features)
+    upload_characteristics_db(data_prep, conn, user_id)
+
     song_stats=get_song_stats()
     make_plot()
     song1 = song_stats[1]

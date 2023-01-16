@@ -142,13 +142,13 @@ def get_features(dataframe, column, sp):
 def prepare_to_upload(dataframe, features):
     features = features.dropna()
     dataframe = dataframe.merge(features, on="song_url")
-    dataframe = dataframe.drop(["end_time", "song_url", "ms_played"], axis=1)
+    dataframe = dataframe.drop(["song_url", "ms_played"], axis=1)
     return dataframe
 
 def upload_characteristics_db(dataframe, conn, user_id):
     
     for i, row in dataframe.iterrows():
-        conn.execute("INSERT INTO User_songs_info VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", [user_id,
+        conn.execute("INSERT INTO User_songs_info VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", [user_id,
                                                                                       row["artist_name"],
                                                                                       row["song_name"],
                                                                                       row["danceability"],
@@ -160,6 +160,7 @@ def upload_characteristics_db(dataframe, conn, user_id):
                                                                                       row["liveness"],
                                                                                       row["valence"],
                                                                                       row["tempo"],
+                                                                                      row["end_time"]
         ])
 
         conn.commit()

@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import re
-import requests
 from unidecode import unidecode
 
 def get_main_wiki_image(artist):

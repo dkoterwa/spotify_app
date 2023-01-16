@@ -169,3 +169,14 @@ def upload_characteristics_db(dataframe, conn, user_id):
 
 
 
+
+def get_song_stats_by_date(user_id, cursor):
+    print(user_id)
+    query ="Select danceability, energy, tempo, acousticness, loudness, instrumentalness, end_time from User_songs_info where UserID =='{}'".format(user_id)
+    cursor.execute(query)
+    print(query)
+    data = cursor.fetchall()
+    print(data)
+    data_frame = pd.DataFrame(cursor.fetchall(), columns=["danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness","end_time"])
+    cursor.close()
+    return data_frame

@@ -86,3 +86,22 @@ def make_general_heatmap(dataframe):
     return fig
 
 
+def song_statistics_through_the_year(dataframe):
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=dataframe['danceability'], y=dataframe['end_time'],
+                        mode='lines',
+                        name='danceability'))
+    fig.add_trace(go.Scatter(x=dataframe['energy'], y=dataframe['end_time'],
+                             mode='lines',
+                             name='energy'))
+    fig.add_trace(go.Scatter(x=dataframe['tempo'], y=dataframe['end_time'],
+                             mode='lines',
+                             name='tempo'))
+    fig.add_trace(go.Scatter(x=dataframe['acousticness'], y=dataframe['end_time'],
+                             mode='lines',
+                             name='acousticnesss'))
+    fig.add_trace(go.Scatter(x=dataframe['instrumentalness'], y=dataframe['end_time'],
+                             mode='lines',
+                             name='instrumentalness'))
+    fig.show()
+    return fig

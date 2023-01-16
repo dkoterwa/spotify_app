@@ -68,17 +68,11 @@ def general_statistics():
 
 @app.route('/detailed-info')
 def detailed_info():
-
     user_id = session.get("unique_id")
     conn, cursor = db_connect("spotify_db.db")
-    data = download_data_for_characteristics(user_id, cursor)
-
-    sp = connect_to_sp(cid, secret)
-    df_links = get_links(data, sp)
-    features = get_features(data, "song_url", sp)
-    data_prep = prepare_to_upload(df_links, features)
-    upload_characteristics_db(data_prep, conn, user_id)
-
+    feautures_data = get_song_stats_by_date(user_id, cursor)
+    plot = song_statistics_through_the_year(feautures_data)
+    graph3JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder)
     song_stats=get_song_stats()
     make_plot()
     song1 = song_stats[1]
@@ -90,7 +84,7 @@ def detailed_info():
         "loudness"
     ]
     song_formatted = [f" {descr} being {song2} is {song1}" for (song1, song2), descr in zip(song_stats, descriptions)]
-    return render_template('detailed_information.html', song_stats=song_formatted, song1=song1)
+    return render_template('detailed_information.html', song_stats=song_formatted, song1=song1, graph3=graph3JSON)
 
 @app.route('/recommendations')
 def recommendations():

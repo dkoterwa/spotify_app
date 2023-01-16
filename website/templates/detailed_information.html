@@ -12,6 +12,13 @@
     <div id="title">
         Detailed information
     </div>
+    <div id="chart3"> </div>
+<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+<script>
+    var graph3 = {{ graph3JSON | safe }};
+    Plotly.plot("chart3", graph3, {})
+</script>
+
 <a>
     <img src="/static/fig1.png" alt="Plot" />
     <br> Your song with the highest:

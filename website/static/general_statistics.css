@@ -272,14 +272,14 @@ button[name = "recommendations"]{
 .favorite-artist-title{
     color:white;
     font-family: Futura;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: bold;
 }
 
 .name-favorite{
     color:rgb(218, 119, 215);
     font-family: Futura;
-    font-size: 22px;
+    font-size: 30px;
     font-weight: bold;
 }
 
@@ -290,13 +290,24 @@ button[name = "recommendations"]{
     left: 10%;
 }
 
+.favorite-artist-songs-list{
+    color:white;
+    font-family: Futura;
+    font-size: 16px;
+}
+
+.favorite-artist-photo{
+    position: absolute;
+    top: 200%;
+    left: 55%;
+}  
 
 #chart1{
     position: absolute;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 280%;
+    top: 300%;
 }
 
 #chart2{
@@ -304,5 +315,5 @@ button[name = "recommendations"]{
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 350%;
+    top: 370%;
 }

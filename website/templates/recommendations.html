@@ -12,15 +12,10 @@
 </div>
 
 <div class="recommender-keys">
-    {% for key in recommender_results.keys() %}
-    <h3>{{ key }}</h3>
+    {% for i in range(5) %}
+    <h3>Because you liked {{ recommender_results["song_personal"][i] }} by {{ recommender_results["artist_personal"][i] }}, you might also like {{ recommender_results["song_database"][i] }} by {{ recommender_results["artist_database"][i] }}, with a distance of {{ recommender_results["distance"][i]}}</h3>
     {% endfor %}
-</div>
 
-<div class="recommender-values">
-    {% for value in recommender_results.values() %}
-    <h3>{{ value }}</h3>
-    {% endfor %}
 </div>
 
 <div class="container-favorites">

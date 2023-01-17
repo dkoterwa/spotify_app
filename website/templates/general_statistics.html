@@ -102,11 +102,15 @@
 
 <div class="favorite-artists-songs">
     <div class="favorite-artist-title">Your favorite songs by <span class="name-favorite"> {{ favorite_artists["artist_name"].iloc[0] }}</span></div>
-    <div class="favorite-artist-songs">
+    <div class="favorite-artist-songs-list">
         {% for i in range(5) %}
         <h3>{{ i+1 }}. {{ favorite_songs_of_fav_artist["song_name"].iloc[i] }} (played {{ favorite_songs_of_fav_artist["count"].iloc[i] }} times) </h3>
         {% endfor %}
     </div>
+</div>
+
+<div class="favorite-artist-photo">
+    <img src="{{ url_for('static', filename='favorite_artist_photo.jpg') }}" width="440px" height="460px">
 </div>
 
 

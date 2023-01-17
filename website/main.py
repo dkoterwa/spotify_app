@@ -19,7 +19,6 @@ import plotly.express as px
 
 app = create_app()
 
-
 @app.route("/", methods=["POST", "GET"])
 
 def upload_file():
@@ -90,10 +89,15 @@ def detailed_info():
 def recommendations():
     user_id = session.get("unique_id")
     conn, cursor = db_connect("spotify_db.db")
+    
+    personal_data = get_data_with_statistics(user_id, cursor)
+    recommender_data = get_data_from_recommender(cursor)
+    recommender_results = recommend_me(personal_data, recommender_data, ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
+
     data = download_data(user_id, cursor)
     favorite_artists = get_general_statistics(data)[1]
     fav_artist_link = [get_main_wiki_image(i) for i in favorite_artists["artist_name"][:5]]
-    return render_template('recommendations.html',favorite_artists = favorite_artists, fav_artist_link=fav_artist_link, zip=zip)
+    return render_template('recommendations.html',favorite_artists = favorite_artists, fav_artist_link=fav_artist_link, recommender_results=recommender_results, zip=zip)
 
 if __name__ == "__main__":
     app.run(debug=True)

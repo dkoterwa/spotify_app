@@ -23,7 +23,6 @@ app = create_app()
 
 def upload_file():
     if request.method == "POST":
-
         files = request.files.getlist("file")
         session["unique_id"] = generate_uuid()
         user_name = request.form["name"]
@@ -55,12 +54,14 @@ def upload_file():
 def general_statistics():
     user_id = session.get("unique_id")
     conn, cursor = db_connect("spotify_db.db")
+    sp = connect_to_sp(cid, secret)
     data = download_data(user_id, cursor)
     scatter = make_general_scatter(data)
     heatmap = make_general_heatmap(data)
     graph1JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder)
     graph2JSON = json.dumps(heatmap, cls=plotly.utils.PlotlyJSONEncoder)
     total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening = get_general_statistics(data)
+    get_favorite_artist_photo(favorite_artists["artist_name"].iloc[0], sp)
 
     fav_artist_link = [get_main_wiki_image(i) for i in favorite_artists["artist_name"][:5]]
     return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON, total_listening_time = total_listening_time, favorite_artists = favorite_artists, favorite_songs = favorite_songs, distinct_artists = distinct_artists, distinct_songs = distinct_songs, favorite_artists_minutes = favorite_artists_minutes, favorite_artist_fraction = favorite_artist_fraction, favorite_songs_of_fav_artist = favorite_songs_of_fav_artist, number_of_songs_by_fav_artist = number_of_songs_by_fav_artist, favorite_morning = favorite_morning, favorite_evening = favorite_evening, fav_artist_link=fav_artist_link, zip=zip)
@@ -99,7 +100,7 @@ def recommendations():
     user_id = session.get("unique_id")
     conn, cursor = db_connect("spotify_db.db")
     
-    personal_data = get_data_with_statistics(user_id, cursor)
+    personal_data = get_data_with_statistics("fd3d877b-6d54-4cba-a037-ed9ab548f8af", cursor)
     recommender_data = get_data_from_recommender(cursor)
     recommender_results = recommend_me(personal_data, recommender_data, ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
 

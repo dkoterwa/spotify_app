@@ -45,7 +45,15 @@ def upload_file():
                             return "The file size is too large"
                     except Exception as e:
                         print("Error: ", e)
-
+        
+        user_id = session.get("unique_id")
+        conn, cursor = db_connect("spotify_db.db")
+        data = download_data_for_characteristics(user_id, cursor)
+        sp = connect_to_sp(cid, secret)
+        df_links = get_links(data)
+        features = get_features(df_links, "song_url", sp)
+        data_prep = prepare_to_upload(df_links, features)
+        upload_characteristics_db(data_prep, conn, user_id)
         return redirect(url_for("general_statistics"))
     else:
         return render_template("index.html")
@@ -71,39 +79,34 @@ def detailed_info():
 
     user_id = session.get("unique_id")
     conn, cursor = db_connect("spotify_db.db")
-    feautures_data = get_song_stats_by_date(user_id, cursor)
-    data = download_data_for_characteristics(user_id, cursor)
+    features_data = get_song_stats_by_date(user_id, cursor)
 
-    sp = connect_to_sp(cid, secret)
-    df_links = get_links(data, sp)
-    features = get_features(data, "song_url", sp)
-    data_prep = prepare_to_upload(df_links, features)
-
-    upload_characteristics_db(data_prep, conn, user_id)
-    plot = song_statistics_through_the_year(feautures_data)
-    graph3JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder)
-    song_stats=get_song_stats()
-    make_plot()
-    song1 = song_stats[1]
-    descriptions = [
-        "dancebility",
-        "energy",
-        "acoustniess",
-        "instrumentalness",
-        "loudness"
-    ]
-    song_formatted = [f" {descr} being {song2} is {song1}" for (song1, song2), descr in zip(song_stats, descriptions)]
-    return render_template('detailed_information.html', song_stats=song_formatted, song1=song1, graph3=graph3JSON)
+    plot = song_statistics_through_the_year(features_data)
+    plot2 = make_radar(features_data)
+    graph3JSON = json.dumps(plot, cls=plotly.utils.PlotlyJSONEncoder)
+    graph4JSON = json.dumps(plot2, cls=plotly.utils.PlotlyJSONEncoder)
+    
+    data_for_maxes = get_song_stats_by_date_with_names(user_id, cursor)
+    max_danceability = data_for_maxes[data_for_maxes["danceability"] == np.max(data_for_maxes["danceability"])].iloc[0]
+    max_energy = data_for_maxes[data_for_maxes["energy"] == np.max(data_for_maxes["energy"])].iloc[0]
+    max_tempo = data_for_maxes[data_for_maxes["tempo"] == np.max(data_for_maxes["tempo"])].iloc[0]
+    max_loudness = data_for_maxes[data_for_maxes["loudness"] == np.max(data_for_maxes["loudness"])].iloc[0]
+    max_instrumental = data_for_maxes[data_for_maxes["instrumentalness"] == np.max(data_for_maxes["instrumentalness"])].iloc[0]
+    max_acoustic = data_for_maxes[data_for_maxes["acousticness"] == np.max(data_for_maxes["acousticness"])].iloc[0]
+    maxes_df = pd.DataFrame([max_danceability, max_energy, max_tempo, max_loudness, max_instrumental, max_acoustic], columns = ["artist_name", "song_name", "danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness", "end_time"])
+    feature_list = ["danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness"]
+    print(maxes_df)
+    return render_template('detailed_information.html', graph3JSON=graph3JSON, graph4JSON=graph4JSON, maxes_df=maxes_df, feature_list=feature_list)
 
 @app.route('/recommendations')
 def recommendations():
     user_id = session.get("unique_id")
     conn, cursor = db_connect("spotify_db.db")
     
-    personal_data = get_data_with_statistics("fd3d877b-6d54-4cba-a037-ed9ab548f8af", cursor)
+    personal_data = get_data_with_statistics(user_id, cursor)
     recommender_data = get_data_from_recommender(cursor)
     recommender_results = recommend_me(personal_data, recommender_data, ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
-
+    
     data = download_data(user_id, cursor)
     favorite_artists = get_general_statistics(data)[1]
     fav_artist_link = [get_main_wiki_image(i) for i in favorite_artists["artist_name"][:5]]

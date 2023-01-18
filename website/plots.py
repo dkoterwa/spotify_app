@@ -4,6 +4,7 @@ from plotly.graph_objs import *
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
+from song_characteristics import *
 
 def make_general_scatter(dataframe):
     dataframe["sec_played"] = dataframe["ms_played"]/1000
@@ -87,21 +88,86 @@ def make_general_heatmap(dataframe):
 
 
 def song_statistics_through_the_year(dataframe):
+    dataframe = normalize(dataframe, ["tempo", "loudness"])
+    dataframe["month"] = pd.to_datetime(dataframe["end_time"]).dt.month
+    plot_data = dataframe.groupby("month").agg("mean").reset_index()
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=dataframe['danceability'], y=dataframe['end_time'],
+    fig.add_trace(go.Scatter(y=plot_data['danceability'], x=plot_data['month'],
                         mode='lines',
                         name='danceability'))
-    fig.add_trace(go.Scatter(x=dataframe['energy'], y=dataframe['end_time'],
+    fig.add_trace(go.Scatter(y=plot_data['energy'], x=plot_data['month'],
                              mode='lines',
                              name='energy'))
-    fig.add_trace(go.Scatter(x=dataframe['tempo'], y=dataframe['end_time'],
+    fig.add_trace(go.Scatter(y=plot_data['tempo'], x=plot_data['month'],
                              mode='lines',
                              name='tempo'))
-    fig.add_trace(go.Scatter(x=dataframe['acousticness'], y=dataframe['end_time'],
+    fig.add_trace(go.Scatter(y=plot_data['acousticness'], x=plot_data['month'],
                              mode='lines',
                              name='acousticnesss'))
-    fig.add_trace(go.Scatter(x=dataframe['instrumentalness'], y=dataframe['end_time'],
+    fig.add_trace(go.Scatter(y=plot_data['instrumentalness'], x=plot_data['month'],
                              mode='lines',
                              name='instrumentalness'))
-    fig.show()
+    fig.add_trace(go.Scatter(y=plot_data['loudness'], x=plot_data['month'],
+                             mode='lines',
+                             name='loudness'))
+
+    fig.update_layout(xaxis_title="Month of the year", 
+                      yaxis_title="Mean of the statistic", 
+                      yaxis_range=(0, 1),
+                      paper_bgcolor="rgba(0,0,0,0)",
+                      plot_bgcolor="rgba(0,0,0,0)",
+                      title_font_color="white",
+                      legend_font_color="white",
+                      title = {
+                                "text":"What are the specifics of the songs you listen to?",
+                                "x": 0.5,
+                                "xanchor":"center",
+                                "yanchor": "top",
+                                "font_size": 22}, 
+                      width=1400,
+                      height=600
+    )
+    fig.update_xaxes(color="white")
+    fig.update_yaxes(color="white")
     return fig
+
+def make_radar(dataframe):
+    dataframe = normalize(dataframe, ["tempo", "loudness"])
+    dataframe = dataframe.agg("mean")
+
+    #fig.add_trace\
+    fig = go.Figure(go.Scatterpolar(
+        name = "Your songs with highest:",
+        r = [dataframe["danceability"], dataframe["energy"], dataframe["acousticness"], dataframe["instrumentalness"], dataframe["loudness"], dataframe["tempo"]],
+        theta = ["danceability", "energy", "accousticness", "instrumentalness", "loudness", "tempo"],
+        fillcolor="rgb(29, 185, 84)",
+        opacity=0.7,
+        line=dict(color='darkgreen',width=3),
+        fill="toself"
+    ))
+    fig.update_layout(
+        polar = dict(
+        bgcolor="rgba(0,0,0,0)",
+        angularaxis = dict(
+        direction = "clockwise",
+        period = 6,
+        tickcolor="white",
+        tickfont_color="white")),
+        title = {
+                "text":"What are the specifics of the songs you listen to?",
+                "x": 0.5,
+                "xanchor":"center",
+                "yanchor": "top",
+                "font_size": 22}, 
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        title_font_color="white",
+        legend_font_color="white",
+        width=1600,
+        height=800
+    )
+    fig.update_polars(radialaxis_color="white") 
+    fig.update_xaxes(color="white")
+    fig.update_yaxes(color="white")
+    return fig
+

@@ -5,6 +5,8 @@ from spotipy.oauth2 import SpotifyClientCredentials
 import spotipy
 from tqdm import tqdm
 import urllib.request
+import time
+from spot_secrets import *
 
 # Function to connect with database
 def db_connect(database_name):
@@ -40,7 +42,7 @@ def download_data_for_characteristics(user_id, cursor):
     data_df = pd.DataFrame(data, columns=["end_time", "artist_name", "song_name", "ms_played"])
     data_df = data_df[data_df["end_time"].str.startswith("2022")]
     data_df = data_df.drop_duplicates("song_name")
-    data_df = data_df.head(int(len(data_df) * 0.01))
+    data_df = data_df.head(int(len(data_df) * 0.02))
 
     return data_df
 
@@ -89,13 +91,37 @@ def get_general_statistics(dataframe):
     return total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening
 
 # Function to get links from Spotify API for personal data
-def get_links(dataframe, sp):
-    songs_links=[]
-    # download links of songs
-    for index, song in tqdm(dataframe.iterrows()):
+def get_links(dataframe):
+    songs_links = []
+    sp = connect_to_sp(cid, secret)
+    counter=0
+    for index,song in tqdm(dataframe.iterrows()):
+
+        if counter > 1000:
+            print("changing to sp2")
+            sp2 = connect_to_sp(cid, secret)
+            sp = sp2
+
+        if counter > 2000:
+            print("changing to sp3")
+            sp3 = connect_to_sp(cid, secret)
+            sp = sp3
+            
+        
+        if counter > 3000:
+            print("changing to sp4")
+            sp4 = connect_to_sp(cid, secret)
+            sp = sp4
+        
+        if counter > 4000:
+            print("changing to sp5")
+            sp5 = connect_to_sp(cid, secret)
+            sp = sp5
+            
+
         results = sp.search(q='artist:' + dataframe["artist_name"][index] + " track:" + dataframe["song_name"][index], type='track')
         items = results['tracks']['items']
-    
+
         if len(items) != 0:
             try:
                 link = items[1]['href']
@@ -105,7 +131,8 @@ def get_links(dataframe, sp):
             link = ""
 
         songs_links.append(link)
-       
+        counter += 1
+
     dataframe['song_url'] = songs_links
     dataframe_clear = dataframe[dataframe['song_url'] != ""] 
 
@@ -193,15 +220,19 @@ def upload_characteristics_db(dataframe, conn, user_id):
 
 # Function to get data with songs features from User_songs_info
 def get_song_stats_by_date(user_id, cursor):
-    print(user_id)
     query ="Select danceability, energy, tempo, acousticness, loudness, instrumentalness, end_time from User_songs_info where UserID =='{}'".format(user_id)
     cursor.execute(query)
-    print(query)
     data = cursor.fetchall()
-    print(data)
-    data_frame = pd.DataFrame(cursor.fetchall(), columns=["danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness","end_time"])
-    cursor.close()
-
+    data_frame = pd.DataFrame(data, columns=["danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness","end_time"])
+    data_frame
+    return data_frame
+# Function to get data with songs features from User_songs_info but also with artist and song name
+def get_song_stats_by_date_with_names(user_id, cursor):
+    query ="Select artist_name, song_name, danceability, energy, tempo, acousticness, loudness, instrumentalness, end_time from User_songs_info where UserID =='{}'".format(user_id)
+    cursor.execute(query)
+    data = cursor.fetchall()
+    data_frame = pd.DataFrame(data, columns=["artist_name", "song_name", "danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness","end_time"])
+    data_frame
     return data_frame
 
 # Function to normalize features which are not yet normalized

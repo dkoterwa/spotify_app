@@ -33,7 +33,6 @@ def get_song_stats():
     cursor.execute("Select song_name, loudness from User_songs_info where loudness = (select max(loudness) from User_songs_info group by song_name)")
     song_stats = cursor.fetchall()[0]
     song_details.append(song_stats)
-    print(song_details)
     cursor.close()
     return song_details
 def make_plot():

@@ -27,15 +27,13 @@
     Plotly.newPlot("chart4", graph4, {})
 </script>
 
-<div class="max-statistics">
-    
-    <div class="statistics-content">
-        <h3>Your song with the highest </h3>
-        {% for i in range(maxes_df.shape[0]) %}
-        <h3>{{feature_list[i] }}: {{ maxes_df["song_name"].iloc[i] }} by {{ maxes_df["artist_name"].iloc[i] }}</h3>
-        {% endfor %}
-    </div>
+
+<div class="statistics-content">
+    {% for i in range(maxes_df.shape[0]) %}
+    <h3>{{feature_list[i] }}: {{ maxes_df["song_name"].iloc[i] }} by {{ maxes_df["artist_name"].iloc[i] }}</h3>
+    {% endfor %}
 </div>
+
 
 </body>
 </html>

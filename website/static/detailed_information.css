@@ -66,14 +66,14 @@ button[name = "recommendations"]{
     border-style: solid;
 }
 
-.statistics-content{
+.statistics-content {
     position: absolute;
-    overflow: hidden;
-    top: 250%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    height: 800px;
-    width: 1200px;
+    top: 210%;
+    left: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+    text-align: left;
 }
 
 #chart3{

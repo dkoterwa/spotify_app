@@ -6,12 +6,20 @@ import numpy as np
 import plotly.graph_objects as go
 from song_characteristics import *
 
-def make_general_scatter(dataframe):
+# Function to create a scatterplot for general statistics 
+def make_general_scatter(user_id):
+    conn, cursor = db_connect("spotify_db3.db")
+    cursor.execute("SELECT a.*, b.Song_name FROM Streaming_data a JOIN Songs b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
+    data = cursor.fetchall()
+
+    dataframe = pd.DataFrame(data, columns = ["User_ID", "Song_ID", "Artist_ID", "end_time", "ms_played", "song_name"])   
+    dataframe["ms_played"] = dataframe["ms_played"].astype(int)
     dataframe["sec_played"] = dataframe["ms_played"]/1000
     dataframe = dataframe.drop(["ms_played"], axis=1)
     dataframe = dataframe.groupby("song_name")["song_name"].size().reset_index(name="count")
     dataframe = dataframe.groupby('count').size().reset_index(name='number_of_songs')
     plot_df = dataframe.copy()
+    
     fig = px.scatter(x=plot_df["number_of_songs"], y=plot_df["count"], labels={"x":"Number of songs", "y":"Number of plays"}, color_discrete_sequence=['#1DB954'])
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
@@ -30,8 +38,15 @@ def make_general_scatter(dataframe):
     fig.update_yaxes(color="white")
     return fig
 
-def make_general_heatmap(dataframe):
+# Function to generate heatmap for general statistics (plot below scatterplot)
+def make_general_heatmap(user_id):
     color_stops = [[0, 'rgb(0,0,0)'], [0.25, 'rgb(0,68,27)'], [0.5, 'rgb(0,109,44)'], [0.75, 'rgb(255,255,191)'], [1, 'rgb(253,174,97)']]
+
+    conn, cursor = db_connect("spotify_db3.db")
+    cursor.execute("SELECT a.*, b.Song_name FROM Streaming_data a JOIN Songs b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
+    data = cursor.fetchall()
+
+    dataframe = pd.DataFrame(data, columns = ["User_ID", "Song_ID", "Artist_ID", "end_time", "ms_played", "song_name"])  
 
     # Convert date
     dataframe['date'] = pd.to_datetime(dataframe['end_time'])
@@ -86,10 +101,16 @@ def make_general_heatmap(dataframe):
 
     return fig
 
+# Function to create first plot for detailed statistics (songs characteristics throughout the year)
+def song_statistics_through_the_year(user_id):
 
-def song_statistics_through_the_year(dataframe):
+    conn, cursor = db_connect("spotify_db3.db")
+    cursor.execute("SELECT a.end_Time, b.* FROM Streaming_data a JOIN Songs_features b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
+    data = cursor.fetchall()
+    dataframe = pd.DataFrame(data, columns=["end_time", "song_id", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
     dataframe = normalize(dataframe, ["tempo", "loudness"])
     dataframe["month"] = pd.to_datetime(dataframe["end_time"]).dt.month
+    
     plot_data = dataframe.groupby("month").agg("mean").reset_index()
     fig = go.Figure()
     fig.add_trace(go.Scatter(y=plot_data['danceability'], x=plot_data['month'],
@@ -131,11 +152,15 @@ def song_statistics_through_the_year(dataframe):
     fig.update_yaxes(color="white")
     return fig
 
-def make_radar(dataframe):
+# Function to create a radar plot for detailed statistics
+def make_radar(user_id):
+    conn, cursor = db_connect("spotify_db3.db")
+    cursor.execute("SELECT a.end_Time, b.* FROM Streaming_data a JOIN Songs_features b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
+    data = cursor.fetchall()
+    dataframe = pd.DataFrame(data, columns=["end_time", "song_id", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
     dataframe = normalize(dataframe, ["tempo", "loudness"])
     dataframe = dataframe.agg("mean")
 
-    #fig.add_trace\
     fig = go.Figure(go.Scatterpolar(
         name = "Your songs with highest:",
         r = [dataframe["danceability"], dataframe["energy"], dataframe["acousticness"], dataframe["instrumentalness"], dataframe["loudness"], dataframe["tempo"]],
@@ -170,4 +195,6 @@ def make_radar(dataframe):
     fig.update_xaxes(color="white")
     fig.update_yaxes(color="white")
     return fig
+
+
 

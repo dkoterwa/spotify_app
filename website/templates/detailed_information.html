@@ -13,6 +13,14 @@
         Detailed information
     </div>
 
+<div class="frame">
+    <span>
+        Spotify has in its database the specifications of each song, such as tempo, acousticness, instrumentalness and more.
+        Thus, we are able to retrieve such characteristics for the songs you listen to, and then visualize them. It gives us a wider perspective and deeper insight.
+    </span>
+</div>
+    
+
 <div id="chart3"> </div>
 <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 <script>
@@ -28,11 +36,26 @@
 </script>
 
 
-<div class="statistics-content">
-    {% for i in range(maxes_df.shape[0]) %}
-    <h3>{{feature_list[i] }}: {{ maxes_df["song_name"].iloc[i] }} by {{ maxes_df["artist_name"].iloc[i] }}</h3>
-    {% endfor %}
+<div class="highest-text">
+    <h3 class="description"> 
+        Your songs with highest
+    </h3>
 </div>
+
+<div class="parent-container">
+    <div class="features-container">
+        {% for i in range(maxes_df.shape[0]) %}
+        <h3 class="feature">{{feature_list[i]}}</h3>
+        {% endfor %}
+    </div>
+    <div class="songs-artists-container">
+        {% for i in range(maxes_df.shape[0]) %}
+        <h3 class="song-text">{{ maxes_df["Song_name"].iloc[i] }} <span class="artist-text">by {{ maxes_df["artist_name"].iloc[i] }}</span></h3>
+        {% endfor %}
+    </div>
+</div>
+
+
 
 
 </body>

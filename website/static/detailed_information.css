@@ -2,7 +2,7 @@
 
 body {
     color: white;
-    background: linear-gradient(to right, #232623, #686857);
+    background: black;
     left: 50%;
     margin-top: 100px
     
@@ -66,22 +66,33 @@ button[name = "recommendations"]{
     border-style: solid;
 }
 
-.statistics-content {
+.frame {
     position: absolute;
-    top: 210%;
-    left: 30%;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; 
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: transparent;
+    width: 80%;
+    padding: 10px;
+    border: 2px solid rgb(29, 185, 84);;
+    text-align: center;
+    margin: 0 auto;
+ }
+ 
+ span{
+    display: inline-block;
     text-align: left;
-}
+    font-size: 18px;
+    font-family: Futura;
+    color: white;
+ }
 
 #chart3{
     position: absolute;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 60%;
+    top: 70%;
 }
 
 #chart4{
@@ -89,5 +100,51 @@ button[name = "recommendations"]{
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-    top: 150%;
+    top: 160%;
+}
+
+.highest-text{
+    position: absolute;
+    top:210%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    color: white;
+    font-family: Futura;
+    font-size: 35px;
+
+}
+.parent-container {
+    position: absolute;
+    top:240%;
+    left: 60%;
+    transform: translate(-50%,-50%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+
+.features-container {
+    text-align: left;
+    margin-right: 50px;
+}
+
+.songs-artists-container {
+    display: inline;
+    text-align: left;
+    margin-left: 50px;
+    width: 70vh;
+
+}
+
+.feature, .song-text, .artist-text {
+    color: white;
+    font-family: Futura;
+    font-size: 20px;
+}
+
+.feature{
+    color: rgb(29, 185, 84);
+    font-family: Futura;
+    font-size: 20px;
 }

@@ -2,7 +2,7 @@
 
 body {
     color: white;
-    background: linear-gradient(to right, #232623, #686857);
+    background: black;
     left: 50%;
     
 }
@@ -57,4 +57,96 @@ button[name = "recommendations"]{
     border-bottom-right-radius: 0%;
     border-bottom-left-radius: 0%;
     border-style: solid;
+}
+
+.frame {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: transparent;
+    width: 80%;
+    padding: 10px;
+    border: 2px solid rgb(29, 185, 84);;
+    text-align: center;
+    margin: 0 auto;
+ }
+ 
+ span{
+    display: inline-block;
+    text-align: left;
+    font-size: 20px;
+    font-family: Futura;
+    color: white;
+ }
+
+
+.title{
+    font-size: 25px;
+    font-family: Futura;
+    margin-bottom: 30px;
+    color: rgb(29, 185, 84);
+}
+.personal-photos, .recommender-photos {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 49%; /* set width to auto */
+    text-align: center;
+}
+
+.personal-photos{
+    position: absolute;
+    top: 40%;
+    left: 5%
+}
+
+.recommender-photos{
+    position: absolute;
+    top: 40%;
+    right: 5%
+}
+
+.personal-photos h3 {
+    font-size: 15px;
+    font-family: Futura;
+    text-align: center;
+    margin-bottom: 10px;
+    max-width: 350px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.recommender-photos h3 {
+    font-size: 15px;
+    font-family: Futura;
+    text-align: center;
+    margin-bottom: 10px;
+    max-width: 350px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.img {
+    display: block;
+    margin-bottom: 30px;
+}
+
+.lines-container {
+    display: flex;
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-direction: column;
+    
+}
+
+.line {
+    height: 5px;
+    width: 200px;
+    background: #1DB954;
+    margin-bottom: 380px;
 }

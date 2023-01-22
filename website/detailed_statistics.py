@@ -13,6 +13,7 @@ def get_user_stats():
     print(user_stats)
     cursor.close()
     return user_stats
+
 def get_song_stats():
     song_details = []
     conn = sqlite3.connect("spotify_db.db")

@@ -7,6 +7,9 @@ from tqdm import tqdm
 import urllib.request
 import time
 from spot_secrets import *
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import pandas as pd
 
 # Function to connect with database
 def db_connect(database_name):
@@ -24,49 +27,37 @@ def connect_to_sp(cid, secret):
 
     return sp
 
-# Function to download user data from Streaming_data
-def download_data(user_id, cursor):
-    query = "SELECT end_time, artist_name, song_name, ms_played FROM Streaming_data WHERE UserID == '{}'".format(user_id)
-    cursor.execute(query)
+# Function to get data with songs features from User_songs_info
+def get_song_stats_by_date(user_id, cursor):
+    cursor.execute("SELECT a.end_Time, b.* FROM Streaming_data a JOIN Songs_features b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
     data = cursor.fetchall()
-    data_df = pd.DataFrame(data, columns=["end_time", "artist_name", "song_name", "ms_played"])
-    data_df = data_df[data_df["end_time"].str.startswith("2022")]
-    
-    return data_df
+    dataframe = pd.DataFrame(data, columns=["end_time", "song_id", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
+    dataframe = normalize(dataframe, ["tempo", "loudness"])
+    dataframe = dataframe[dataframe["end_time"].str.startswith("2022")]
+    return dataframe
 
-# Function to download data from Streaming_data to upload characteristics for songs. Songs in outputed dataframe are unique and reduced (to make calculations faster)
-def download_data_for_characteristics(user_id, cursor):
-    query = "SELECT end_time, artist_name, song_name, ms_played FROM Streaming_data WHERE UserID == '{}'".format(user_id)
-    cursor.execute(query)
+# Function to get data with songs features from User_songs_info but also with artist and song name
+def get_song_stats_by_date_with_names(user_id, cursor):
+    cursor.execute("SELECT a.end_Time, a.Artist_ID, b.* FROM Streaming_data a JOIN Songs_features b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
     data = cursor.fetchall()
-    data_df = pd.DataFrame(data, columns=["end_time", "artist_name", "song_name", "ms_played"])
-    data_df = data_df[data_df["end_time"].str.startswith("2022")]
-    data_df = data_df.drop_duplicates("song_name")
-    data_df = data_df.head(int(len(data_df) * 0.02))
+    dataframe = pd.DataFrame(data, columns=["end_time", "Artist_ID","song_id", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
+    dataframe = normalize(dataframe, ["tempo", "loudness"])
+    cursor.execute("SELECT * FROM Artists")
+    artists = cursor.fetchall()
+    artists_dataframe = pd.DataFrame(artists, columns=["Artist_ID", "artist_name"])
+    final_df = pd.merge(dataframe, artists_dataframe, on="Artist_ID")
+    return final_df
 
-    return data_df
-
-# Function to get songs with features from User_songs_info
-def get_data_with_statistics(user_id, cursor):
-    query = "SELECT artist_name, song_name, danceability, energy, loudness, speechiness, acousticness, instrumentalness, liveness, valence, tempo, end_time FROM User_songs_info WHERE UserID == '{}'".format(user_id)
-    cursor.execute(query)
-    data = cursor.fetchall()
-    data_df = pd.DataFrame(data, columns=["artist_name", "song_name", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo", "end_time"])
-    data_df = data_df[data_df["end_time"].str.startswith("2022")]
-
-    return data_df
-
-# Function to get data dedicated for recommender
-def get_data_from_recommender(cursor):
-    query = "SELECT * FROM Recommender"
-    cursor.execute(query)
-    data = cursor.fetchall()
-    data_df = pd.DataFrame(data, columns=["artist_name", "song_name", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo", "album", "track_id"])
-    
-    return data_df
 
 # Function to get statistics needed for general statistics website section
-def get_general_statistics(dataframe):
+def get_general_statistics(user_id):
+    conn, cursor = db_connect("spotify_db3.db")
+    cursor.execute("SELECT a.*, b.Song_name, c.Artist_name FROM Streaming_data a INNER JOIN Songs b ON a.Song_ID = b.Song_ID INNER JOIN Artists c ON b.Artist_ID = c.Artist_ID WHERE a.User_ID = '{}' ".format(user_id))
+    data = cursor.fetchall()
+    dataframe = pd.DataFrame(data, columns = ["User_ID", "Song_ID", "Artist_ID", "end_time", "ms_played", "song_name", "artist_name"])
+
+    dataframe= dataframe[dataframe["end_time"].str.startswith("2022")]
+    dataframe['ms_played'] = dataframe["ms_played"].astype(int)  
     dataframe["min_played"] = dataframe["ms_played"]/60000
     total_listening_time = dataframe["min_played"].sum().astype(int) # Total listening time
     
@@ -91,149 +82,40 @@ def get_general_statistics(dataframe):
     return total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening
 
 # Function to get links from Spotify API for personal data
-def get_links(dataframe):
-    songs_links = []
-    sp = connect_to_sp(cid, secret)
-    counter=0
-    for index,song in tqdm(dataframe.iterrows()):
+def get_audio_features(df, cid, secret):
+    # Create the Spotify client
+    client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-        if counter > 1000:
-            print("changing to sp2")
-            sp2 = connect_to_sp(cid, secret)
-            sp = sp2
+    # Create columns for each feature
+    features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
+    for feature in features:
+        df[feature] = None
+    # Iterate through each row of the DataFrame
+    for i, row in tqdm(df.iterrows()):
+        artist = row['artistName']
+        track_name = row['trackName']
+        try:
+            # Search for the track
+            results = sp.search(q=f'track:{track_name} artist:{artist}', type='track')
+            track_id = results['tracks']['items'][0]['id']
+            # Retrieve the track's audio features
+            audio_features = sp.audio_features(track_id)
+            # Populate the corresponding feature column in the DataFrame
+            for feature in features:
+                df.at[i, feature] = audio_features[0][feature]
+        except:
+            print(f"No data found for {artist} - {track_name}")
+    return df
 
-        if counter > 2000:
-            print("changing to sp3")
-            sp3 = connect_to_sp(cid, secret)
-            sp = sp3
-            
-        
-        if counter > 3000:
-            print("changing to sp4")
-            sp4 = connect_to_sp(cid, secret)
-            sp = sp4
-        
-        if counter > 4000:
-            print("changing to sp5")
-            sp5 = connect_to_sp(cid, secret)
-            sp = sp5
-            
-
-        results = sp.search(q='artist:' + dataframe["artist_name"][index] + " track:" + dataframe["song_name"][index], type='track')
-        items = results['tracks']['items']
-
-        if len(items) != 0:
-            try:
-                link = items[1]['href']
-            except:
-                link = items[0]['href']
-        else:
-            link = ""
-
-        songs_links.append(link)
-        counter += 1
-
-    dataframe['song_url'] = songs_links
-    dataframe_clear = dataframe[dataframe['song_url'] != ""] 
-
-    return dataframe_clear
-
-# Get features for songs from personal data based on links downloaded earlier
-def get_features(dataframe, column, sp):
-    links = []
-    danceability = []
-    energy = []
-    loudness = []
-    speechiness = []
-    acousticness = [] 
-    instrumentalness = []
-    liveness = []
-    valence = []
-    tempo = []
-
-    for link in tqdm(dataframe[column]):  
-
-        connection = sp.audio_features(link)[0]
-        
-        if connection is not None:
-            links.append(link)
-            danceability.append(connection.get("danceability", None))
-            energy.append(connection.get("energy", None))
-            loudness.append(connection.get("loudness", None))
-            speechiness.append(connection.get("speechiness", None))
-            acousticness.append(connection.get("acousticness", None))
-            instrumentalness.append(connection.get("instrumentalness", None))
-            liveness.append(connection.get("liveness", None))
-            valence.append(connection.get("valence", None))
-            tempo.append(connection.get("tempo", None))
-        else:
-            links.append(None)
-            danceability.append(None)
-            energy.append(None)
-            loudness.append(None)
-            speechiness.append(None)
-            acousticness.append(None)
-            instrumentalness.append(None)
-            liveness.append(None)
-            valence.append(None)
-            tempo.append(None)
-
-    features_df = pd.DataFrame({"song_url": links,
-                                "danceability": danceability,
-                                "energy": energy,
-                                "loudness": loudness,
-                                "speechiness": speechiness,
-                                "acousticness": acousticness,
-                                "instrumentalness": instrumentalness,
-                                "liveness": liveness,
-                                "valence": valence,
-                                "tempo": tempo})
-    return features_df
 
 # Function to merge data with features 
 def prepare_to_upload(dataframe, features):
     features = features.dropna()
     dataframe = dataframe.merge(features, on="song_url")
-    dataframe = dataframe.drop(["song_url", "ms_played"], axis=1)
+    dataframe = dataframe.drop(["song_url", "msPlayed"], axis=1)
 
     return dataframe
-
-# Function to upload data with features to database
-def upload_characteristics_db(dataframe, conn, user_id):
-    for i, row in dataframe.iterrows():
-        conn.execute("INSERT INTO User_songs_info VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", [user_id,
-                                                                                      row["artist_name"],
-                                                                                      row["song_name"],
-                                                                                      row["danceability"],
-                                                                                      row["energy"],
-                                                                                      row["loudness"],
-                                                                                      row["speechiness"],
-                                                                                      row["acousticness"],
-                                                                                      row["instrumentalness"],
-                                                                                      row["liveness"],
-                                                                                      row["valence"],
-                                                                                      row["tempo"],
-                                                                                      row["end_time"]
-        ])
-
-        conn.commit()
-
-# Function to get data with songs features from User_songs_info
-def get_song_stats_by_date(user_id, cursor):
-    query ="Select danceability, energy, tempo, acousticness, loudness, instrumentalness, end_time from User_songs_info where UserID =='{}'".format(user_id)
-    cursor.execute(query)
-    data = cursor.fetchall()
-    data_frame = pd.DataFrame(data, columns=["danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness","end_time"])
-    data_frame
-    return data_frame
-# Function to get data with songs features from User_songs_info but also with artist and song name
-def get_song_stats_by_date_with_names(user_id, cursor):
-    query ="Select artist_name, song_name, danceability, energy, tempo, acousticness, loudness, instrumentalness, end_time from User_songs_info where UserID =='{}'".format(user_id)
-    cursor.execute(query)
-    data = cursor.fetchall()
-    data_frame = pd.DataFrame(data, columns=["artist_name", "song_name", "danceability", "energy", "tempo", "acousticness", "loudness", "instrumentalness","end_time"])
-    data_frame
-    return data_frame
 
 # Function to normalize features which are not yet normalized
 def normalize(df, columns):
@@ -255,19 +137,22 @@ def recommend_me(df_personal, df_recommender, columns_for_vector):
 
     df_personal = normalize(df_personal, ["loudness", "tempo"])
     df_recommender = normalize(df_recommender, ["loudness", "tempo"])    
-    df_personal = df_personal.sample(int(df_personal.shape[0]/3))
+    rows_to_drop = df_recommender[df_recommender["track_name"].isin(df_personal["Song_name"])].index
+    df_recommender = df_recommender.drop(rows_to_drop)
+    df_personal = df_personal.sample(int(df_personal.shape[0]/20))
     df_recommender = df_recommender.sample(int(df_recommender.shape[0]/5))
+
     
     for i in tqdm(range (0, df_personal.shape[0])):
         for j in tqdm(range(0, df_recommender.shape[0])):
 
             distance = np.linalg.norm(df_personal[columns_for_vector].iloc[i, ].values - df_recommender[columns_for_vector].iloc[j, ].values)
     
-            if all(distance < d for d in results_dict["distance"]) and df_personal["artist_name"].iloc[i] not in results_dict["artist_personal"] and df_recommender["song_name"].iloc[j] not in results_dict["song_database"]:            
-                results_dict["song_personal"].append(df_personal["song_name"].iloc[i])
+            if all(distance < d for d in results_dict["distance"]) and df_personal["artist_name"].iloc[i] not in results_dict["artist_personal"] and df_recommender["track_name"].iloc[j] not in results_dict["song_database"] and df_recommender["artist"].iloc[j] not in results_dict["artist_database"] and df_recommender["track_name"].iloc[j] not in df_personal["Song_name"]:            
+                results_dict["song_personal"].append(df_personal["Song_name"].iloc[i])
                 results_dict["artist_personal"].append(df_personal["artist_name"].iloc[i])
-                results_dict["artist_database"].append(df_recommender["artist_name"].iloc[j])
-                results_dict["song_database"].append(df_recommender["song_name"].iloc[j])
+                results_dict["artist_database"].append(df_recommender["artist"].iloc[j])
+                results_dict["song_database"].append(df_recommender["track_name"].iloc[j])
                 results_dict["distance"].append(distance)
 
             if len(results_dict["distance"]) > 5:
@@ -288,7 +173,6 @@ def get_favorite_artist_photo(artist_name, sp):
     
     urllib.request.urlretrieve(artist_image_url, "../website/static/favorite_artist_photo.jpg")
 
-
 # Get photos for personal and recommended songs and save them in static folder
 def get_artists_photos(results_dict, sp):
     for i in tqdm(range(len(results_dict))):
@@ -303,8 +187,8 @@ def get_artists_photos(results_dict, sp):
         artist_image_url_personal = artist_search_personal['images'][0]['url']
         artist_image_url_recommender = artist_search_recommender['images'][0]['url']
 
-        urllib.request.urlretrieve(artist_image_url_personal, "../website/static/artist_image_personal" + str(i) + ".jpg")
-        urllib.request.urlretrieve(artist_image_url_recommender, "../website/static/artist_image_recommender" + str(i) + ".jpg")
+        urllib.request.urlretrieve(artist_image_url_personal, "../website/static/photos_personal/artist_image_personal" + str(i) + ".jpg")
+        urllib.request.urlretrieve(artist_image_url_recommender, "../website/static/photos_recommender/artist_image_recommender" + str(i) + ".jpg")
 
 
     

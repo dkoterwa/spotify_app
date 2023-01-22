@@ -11,26 +11,38 @@
     Recommendations
 </div>
 
-<div class="recommender-keys">
+<div class="frame">
+    <span>
+        We can build a content-based recommender based on characteristics of songs. We collect your streaming data and compare it with songs located in our recommender database.
+        Then, we are able to recommend tracks similar to your personal taste.
+    </span>
+</div>
+
+<div class="personal-photos">
+    <div class="title">Because you listened to...</div>
     {% for i in range(5) %}
-    <h3>Because you liked {{ recommender_results["song_personal"][i] }} by {{ recommender_results["artist_personal"][i] }}, you might also like {{ recommender_results["song_database"][i] }} by {{ recommender_results["artist_database"][i] }}, with a distance of {{ recommender_results["distance"][i]}}</h3>
+        <h3>{{ recommender_results["song_personal"][i] }} by {{ recommender_results["artist_personal"][i] }} </h3>
+        <img src="{{ url_for('static', filename='photos_personal/artist_image_personal{}.jpg'.format(i)) }}" width="300" height="300" style="margin-bottom: 40px;">    
     {% endfor %}
-
 </div>
 
-<div class="container-favorites">
-    <div class="favorite-artists-section">
-        <div class="favorite-artists-title">Favorite Artists</div>
-        <div class="favorite-artists">
-            {% for (artist, image) in zip(favorite_artists["artist_name"][:5], fav_artist_link[:5]) %}
-            <img src="{{image}}" alt="{{image}}" />
-             <div class="favorite-artist">
-                   <h3>{{ artist }}</h3>
-             </div>
-            {% endfor %}
-        </div>
-    </div>
+<div class="recommender-photos">
+    <div class="title">...we recommend</div>
+    {% for i in range(5) %}
+        <h3>{{ recommender_results["song_database"][i] }} by {{ recommender_results["artist_database"][i] }} </h3>
+        <img src="{{ url_for('static', filename='photos_recommender/artist_image_recommender{}.jpg'.format(i)) }}" width="300" height="300" style="margin-bottom: 40px;">  
+    {% endfor %}
 </div>
+
+<div class="lines-container">
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+    <div class="line"></div>
+</div>
+
+
 
 </body>
 </html>

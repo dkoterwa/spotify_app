@@ -15,8 +15,8 @@ Project is created with:
 	
 ## Setup
 **To run this project**
-1. Download your data or use examples in the spotify_data folder
+1. Download your data or use examples in the **spotify_data** folder
 2. Clone this repository
 3. Add your secrets from Spotify developer account to the **spoc_secrets.py** file
-4. Run main.py file
+4. Run **main.py** file
 5. Upload your data and be happy with your Custom Spotify Wrapped :)

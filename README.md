@@ -12,6 +12,8 @@ Project is created with:
 * Python
 * Flask
 * Spotify API
+* HTML
+* CSS
 	
 ## Setup
 **To run this project**

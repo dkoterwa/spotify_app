@@ -4,7 +4,7 @@ This project is a Custom Spotify Wrapped. It is a web application, which allows 
 
 **If you are interested in downloading your personal data, please follow this article:** [Article](https://support.spotify.com/us/article/data-rights-and-privacy-settings/)
 
-**DEMO OF THE APP**
+**DEMO OF THE APP**:
 https://youtu.be/NSv8EIZC5w4
 	
 ## Technologies

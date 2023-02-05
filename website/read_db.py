@@ -22,22 +22,22 @@ def read_file(file, user_id):
     
     # Upload records
     for index, row in dataframe.iterrows():
-        
         artist_name = row["artistName"]
         cursor.execute("SELECT Artist_ID FROM Artists WHERE Artist_name == ?", (artist_name,))
         artist_id = cursor.fetchone()
-        if artist_id is not None:
-            artist_id = artist_id[0]
-        if artist_id is None:
+        if artist_id is not None: # Take artist ID from database
+            artist_id = artist_id[0] 
+        if artist_id is None: # Generate and upload if artist is not in database
             artist_id = generate_uuid()
             cursor.execute("INSERT INTO Artists (Artist_ID, Artist_name) VALUES(?,?)", (artist_id, artist_name))
-        
+
         song_name = row["trackName"]
         cursor.execute("SELECT Song_ID FROM Songs WHERE Song_name == ?", (song_name,))
+        
         song_id = cursor.fetchone()
-        if song_id is not None:
+        if song_id is not None: # Take song ID from database
             song_id = song_id[0]
-        if song_id is None:
+        if song_id is None: # Generate and upload if song is not in database
             song_id = generate_uuid()
             cursor.execute("INSERT INTO Songs (Song_ID, Artist_ID, Song_name) VALUES(?,?,?)", (str(song_id), 
                                                                                                str(artist_id),
@@ -63,7 +63,7 @@ def read_file(file, user_id):
     for index, row in data_final.iterrows():
         cursor.execute("INSERT INTO Streaming_data (User_ID, Song_ID, Artist_ID, end_Time, ms_Played) VALUES (?,?,?,?,?)",(str(user_id), row["Song_ID"], row["Artist_ID"],row["endTime"],row["msPlayed"]))
 
-                                              
+    # Upload data to Songs_features table (uploading only 10% of songs in order to save time)                                 
     dataframe_without_duplicates = dataframe.drop_duplicates("trackName")
     dataframe_without_duplicates = dataframe_without_duplicates.head(int(len(dataframe_without_duplicates) * 0.1))   
     dataframe_without_duplicates = get_audio_features(dataframe_without_duplicates, cid, secret)
@@ -79,7 +79,6 @@ def read_file(file, user_id):
 
     # Commit the changes to the database
     conn.commit()
-
     # Close the connection to the database
     conn.close()
 

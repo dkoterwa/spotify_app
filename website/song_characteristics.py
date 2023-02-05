@@ -145,22 +145,22 @@ def recommend_me(df_personal, df_recommender, columns_for_vector):
     
     for i in tqdm(range (0, df_personal.shape[0])):
         for j in tqdm(range(0, df_recommender.shape[0])):
-
+            # Calculating distance
             distance = np.linalg.norm(df_personal[columns_for_vector].iloc[i, ].values - df_recommender[columns_for_vector].iloc[j, ].values)
-    
+            # Checking if the distance is significant and if user hasn't already listened to this song
             if all(distance < d for d in results_dict["distance"]) and df_personal["artist_name"].iloc[i] not in results_dict["artist_personal"] and df_recommender["track_name"].iloc[j] not in results_dict["song_database"] and df_recommender["artist"].iloc[j] not in results_dict["artist_database"] and df_recommender["track_name"].iloc[j] not in df_personal["Song_name"]:            
                 results_dict["song_personal"].append(df_personal["Song_name"].iloc[i])
                 results_dict["artist_personal"].append(df_personal["artist_name"].iloc[i])
                 results_dict["artist_database"].append(df_recommender["artist"].iloc[j])
                 results_dict["song_database"].append(df_recommender["track_name"].iloc[j])
                 results_dict["distance"].append(distance)
-
+            # Dropping song with highest distance if the dictionary is longer than our wanted length
             if len(results_dict["distance"]) > 5:
-                lowest_value = min(results_dict["distance"])
-                lowest_index = results_dict["distance"].index(lowest_value)
+                highest_value = max(results_dict["distance"])
+                highest_index = results_dict["distance"].index(highest_value)
                 
                 for key in results_dict:
-                    results_dict[key].pop(lowest_index)
+                    results_dict[key].pop(highest_index)
                 
     return results_dict
 

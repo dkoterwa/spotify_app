@@ -13,9 +13,7 @@ import pandas as pd
 
 # Function to connect with database
 def db_connect(database_name):
-  # Connect to the database
   conn = sqlite3.connect(database_name)
-  # Create a cursor
   cursor = conn.cursor()
   
   return conn, cursor
@@ -24,7 +22,6 @@ def db_connect(database_name):
 def connect_to_sp(cid, secret):
     client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
     sp = spotipy.Spotify(client_credentials_manager = client_credentials_manager)
-
     return sp
 
 # Function to get data with songs features from User_songs_info
@@ -51,7 +48,7 @@ def get_song_stats_by_date_with_names(user_id, cursor):
 
 # Function to get statistics needed for general statistics website section
 def get_general_statistics(user_id):
-    conn, cursor = db_connect("spotify_db3.db")
+    _, cursor = db_connect("spotify_db3.db")
     cursor.execute("SELECT a.*, b.Song_name, c.Artist_name FROM Streaming_data a INNER JOIN Songs b ON a.Song_ID = b.Song_ID INNER JOIN Artists c ON b.Artist_ID = c.Artist_ID WHERE a.User_ID = '{}' ".format(user_id))
     data = cursor.fetchall()
     dataframe = pd.DataFrame(data, columns = ["User_ID", "Song_ID", "Artist_ID", "end_time", "ms_played", "song_name", "artist_name"])
@@ -59,52 +56,56 @@ def get_general_statistics(user_id):
     dataframe= dataframe[dataframe["end_time"].str.startswith("2022")]
     dataframe['ms_played'] = dataframe["ms_played"].astype(int)  
     dataframe["min_played"] = dataframe["ms_played"]/60000
-    total_listening_time = dataframe["min_played"].sum().astype(int) # Total listening time
+    total_listening_time = dataframe["min_played"].sum().astype(int) 
     
-    favorite_artists = dataframe.groupby("artist_name")["artist_name"].size().reset_index(name="count").sort_values("count", ascending=False) # Favorite artists
-    favorite_songs = dataframe.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False) # Favorite songs
-    distinct_artists = len(dataframe.drop_duplicates("artist_name")) # Distinct artists
-    distinct_songs = len(dataframe.drop_duplicates("song_name")) # Distinct songs
+    favorite_artists = dataframe.groupby("artist_name")["artist_name"].size().reset_index(name="count").sort_values("count", ascending=False)
+    favorite_songs = dataframe.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False) 
+    distinct_artists = len(dataframe.drop_duplicates("artist_name")) 
+    distinct_songs = len(dataframe.drop_duplicates("song_name")) 
 
     # Stats for favorite artist
-    favorite_artists_minutes = dataframe.groupby("artist_name")["min_played"].sum().astype(int).reset_index(name="sum_of_minutes").sort_values("sum_of_minutes", ascending=False) # Minutes of favorite artists
-    favorite_artist_fraction = np.round((favorite_artists_minutes["sum_of_minutes"].iloc[0] * 100 / favorite_artists_minutes["sum_of_minutes"][1:].sum()), 2) # Percentage of minutes occupied by favorite artist
-    favorite_songs_of_fav_artist = favorite_songs[favorite_songs["artist_name"] == favorite_artists["artist_name"].iloc[0]] # Favorite songs of favorite artist
-    number_of_songs_by_fav_artist = len(favorite_songs_of_fav_artist) # Number of distinct songs of favorite artist listened
+    favorite_artists_minutes = dataframe.groupby("artist_name")["min_played"].sum().astype(int).reset_index(name="sum_of_minutes").sort_values("sum_of_minutes", ascending=False) 
+    favorite_artist_fraction = np.round((favorite_artists_minutes["sum_of_minutes"].iloc[0] * 100 / favorite_artists_minutes["sum_of_minutes"][1:].sum()), 2) 
+    favorite_songs_of_fav_artist = favorite_songs[favorite_songs["artist_name"] == favorite_artists["artist_name"].iloc[0]] 
+    number_of_songs_by_fav_artist = len(favorite_songs_of_fav_artist) 
 
     # Top morning and evening songs
     dataframe["hour"] = pd.to_datetime(dataframe["end_time"]).dt.hour
     dataframe_evening = dataframe[(dataframe["hour"].astype(int) > 19) | (dataframe["hour"].astype(int) < 5)]
     dataframe_morning = dataframe[(dataframe["hour"].astype(int) > 5) & (dataframe["hour"].astype(int) < 10)]
-    favorite_evening = dataframe_evening.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False)[:5] # Favorite morning songs
-    favorite_morning = dataframe_morning.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False)[:5] # Favorite evening songs
+    favorite_evening = dataframe_evening.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False)[:5]
+    favorite_morning = dataframe_morning.groupby(["artist_name", "song_name"]).size().reset_index(name="count").sort_values("count", ascending=False)[:5] 
 
-    return total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening
+    return {"total_listening_time": total_listening_time, 
+            "favorite_artists": favorite_artists,
+            "favorite_songs": favorite_songs, 
+            "distinct_artists": distinct_artists, 
+            "distinct_songs": distinct_songs, 
+            "favorite_artists_minutes": favorite_artists_minutes, 
+            "favorite_artists_fraction": favorite_artist_fraction, 
+            "favorite_songs_of_fav_artist": favorite_songs_of_fav_artist, 
+            "number_of_songs_by_fav_artist": number_of_songs_by_fav_artist, 
+            "favorite_morning_songs": favorite_morning, 
+            "favorite_evening_songs": favorite_evening}
 
 # Function to get links from Spotify API for personal data
 def get_audio_features(df, cid, secret):
-    # Create the Spotify client
     client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
-    # Create columns for each feature
     features = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
     for feature in features:
         df[feature] = None
-    # Iterate through each row of the DataFrame
+        
     for i, row in tqdm(df.iterrows()):
         artist = row['artistName']
         track_name = row['trackName']
         try:
-            # Search for the track
             results = sp.search(q=f'track:{track_name} artist:{artist}', type='track')
             track_id = results['tracks']['items'][0]['id']
-            # Retrieve the track's audio features
             audio_features = sp.audio_features(track_id)
-            # Populate the corresponding feature column in the DataFrame
             for feature in features:
                 df.at[i, feature] = audio_features[0][feature]
-        except:
+        except Exception:
             print(f"No data found for {artist} - {track_name}")
     return df
 
@@ -143,8 +144,8 @@ def recommend_me(df_personal, df_recommender, columns_for_vector):
     df_recommender = df_recommender.sample(int(df_recommender.shape[0]/5))
 
     
-    for i in tqdm(range (0, df_personal.shape[0])):
-        for j in tqdm(range(0, df_recommender.shape[0])):
+    for i in range (0, df_personal.shape[0]):
+        for j in range(0, df_recommender.shape[0]):
             # Calculating distance
             distance = np.linalg.norm(df_personal[columns_for_vector].iloc[i, ].values - df_recommender[columns_for_vector].iloc[j, ].values)
             # Checking if the distance is significant and if user hasn't already listened to this song
@@ -170,12 +171,11 @@ def get_favorite_artist_photo(artist_name, sp):
     artist_id = result["artists"]["items"][0]["id"]
     artist_search = sp.artist(artist_id)
     artist_image_url = artist_search["images"][0]["url"]
-    
     urllib.request.urlretrieve(artist_image_url, "../website/static/favorite_artist_photo.jpg")
 
 # Get photos for personal and recommended songs and save them in static folder
 def get_artists_photos(results_dict, sp):
-    for i in tqdm(range(len(results_dict))):
+    for i in range(len(results_dict)):
         artist_personal_name = results_dict["artist_personal"][i]
         artist_recommender_name = results_dict["artist_database"][i]
         result_personal = sp.search(q=artist_personal_name, type='artist')

@@ -1,20 +1,17 @@
-from __init__ import create_app
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for, session
+from website import create_app
+from flask import render_template, request, redirect, url_for, session
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
-from read_db import read_file, generate_uuid, upload_user
-from spotipy.oauth2 import SpotifyClientCredentials
-import spotipy
-from datetime import datetime
-from song_characteristics import *
-from plots import *
-from webscrapping import *
-from spot_secrets import *
+from website.read_db import read_file, generate_uuid, upload_user
+from song_characteristics import get_song_stats_by_date_with_names, recommend_me, get_favorite_artist_photo, get_artists_photos, db_connect, connect_to_sp, get_general_statistics
+from website.plots import make_general_scatter, make_general_heatmap, make_radar, song_statistics_through_the_year
+from spot_secrets import cid, secret
 import os
-import uuid
 import json
 import plotly
-import plotly.express as px
+import pandas as pd
+import numpy as np
+RECOMMENDER_DATA_PATH = "../spotify_data/playlists_data_to_recommend.csv"
 
 app = create_app()
 
@@ -26,11 +23,10 @@ def upload_file():
         user_name = request.form["name"]
         user_age = request.form["age"]
         upload_user(session["unique_id"], user_name, user_age)
-
+        
         for f in files: 
             if not f.filename: # Check if user uploaded any file
                 return "No file was uploaded"
-            
             extension = os.path.splitext(f.filename)[1]
             if f:
                 if extension not in app.config["ALLOWED_EXTENSIONS"]: # Check extension
@@ -60,10 +56,9 @@ def general_statistics():
     graph2JSON = json.dumps(heatmap, cls=plotly.utils.PlotlyJSONEncoder)
     
     # Get statistics
-    total_listening_time, favorite_artists, favorite_songs, distinct_artists, distinct_songs, favorite_artists_minutes, favorite_artist_fraction, favorite_songs_of_fav_artist, number_of_songs_by_fav_artist, favorite_morning, favorite_evening = get_general_statistics(user_id)
-    get_favorite_artist_photo(favorite_artists["artist_name"].iloc[0], sp)
-
-    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON, total_listening_time = total_listening_time, favorite_artists = favorite_artists, favorite_songs = favorite_songs, distinct_artists = distinct_artists, distinct_songs = distinct_songs, favorite_artists_minutes = favorite_artists_minutes, favorite_artist_fraction = favorite_artist_fraction, favorite_songs_of_fav_artist = favorite_songs_of_fav_artist, number_of_songs_by_fav_artist = number_of_songs_by_fav_artist, favorite_morning = favorite_morning, favorite_evening = favorite_evening)
+    general_statistics = get_general_statistics(user_id)
+    get_favorite_artist_photo(general_statistics["favorite_artists"]["artist_name"].iloc[0], sp)
+    return render_template("general_statistics.html", graph1JSON=graph1JSON, graph2JSON=graph2JSON, general_statistics=general_statistics)
 
 @app.route('/detailed-info')
 def detailed_info():
@@ -96,22 +91,17 @@ def detailed_info():
 @app.route('/recommendations')
 def recommendations():
     user_id = session.get("unique_id")
-    conn, cursor = db_connect("spotify_db3.db")
+    _, cursor = db_connect("spotify_db3.db")
     sp = connect_to_sp(cid, secret)
-
-    # Get personal data and data for recommendations
     data_personal = get_song_stats_by_date_with_names(user_id, cursor)
     cursor.execute("SELECT * FROM SONGS")
     songs_df = pd.DataFrame(cursor.fetchall(), columns=["song_id", "Artist_ID", "Song_name"])
     personal_data = pd.merge(data_personal, songs_df, on="song_id")
-    recommender_data = pd.read_csv("../spotify_data/playlists_data_to_recommend.csv", index_col=0)
     
-    # Recommend songs
+    recommender_data = pd.read_csv(RECOMMENDER_DATA_PATH, index_col=0)
     recommender_results = recommend_me(personal_data, recommender_data, ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
-    
-    # Generate photos
     get_artists_photos(recommender_results, sp)
-    return render_template('recommendations.html', recommender_results=recommender_results, zip=zip)
+    return render_template("recommendations.html", recommender_results=recommender_results, zip=zip)
 
 if __name__ == "__main__":
     app.run(debug=True)

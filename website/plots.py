@@ -4,7 +4,7 @@ from plotly.graph_objs import *
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
-from song_characteristics import *
+from website.song_characteristics import *
 
 # Function to create a scatterplot for general statistics 
 def make_general_scatter(user_id):
@@ -41,7 +41,6 @@ def make_general_scatter(user_id):
 # Function to generate heatmap for general statistics (plot below scatterplot)
 def make_general_heatmap(user_id):
     color_stops = [[0, 'rgb(0,0,0)'], [0.25, 'rgb(0,68,27)'], [0.5, 'rgb(0,109,44)'], [0.75, 'rgb(255,255,191)'], [1, 'rgb(253,174,97)']]
-
     conn, cursor = db_connect("spotify_db3.db")
     cursor.execute("SELECT a.*, b.Song_name FROM Streaming_data a JOIN Songs b ON a.Song_ID = b.Song_ID WHERE User_ID = '{}' ".format(user_id))
     data = cursor.fetchall()
@@ -53,7 +52,7 @@ def make_general_heatmap(user_id):
     dataframe['date'] = pd.to_datetime(dataframe['date'].dt.date)
     # Extract the hour and week from the datetime
     dataframe['hour'] = pd.to_datetime(dataframe['end_time']).dt.hour
-    dataframe['week'] = pd.to_datetime(dataframe['end_time']).dt.week
+    dataframe['week'] = pd.to_datetime(dataframe['end_time']).dt.isocalendar().week
     # Group the data by week and hour
     df_grouped = dataframe.groupby(['week', 'hour']).size().reset_index(name='count')
     # Add missing hours and weeks
@@ -111,7 +110,7 @@ def song_statistics_through_the_year(user_id):
     dataframe = normalize(dataframe, ["tempo", "loudness"])
     dataframe["month"] = pd.to_datetime(dataframe["end_time"]).dt.month
     
-    plot_data = dataframe.groupby("month").agg("mean").reset_index()
+    plot_data = dataframe.drop(["end_time", "song_id"], axis=1).groupby("month").agg("mean").reset_index()
     fig = go.Figure()
     fig.add_trace(go.Scatter(y=plot_data['danceability'], x=plot_data['month'],
                         mode='lines',
@@ -159,7 +158,7 @@ def make_radar(user_id):
     data = cursor.fetchall()
     dataframe = pd.DataFrame(data, columns=["end_time", "song_id", "danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "tempo"])
     dataframe = normalize(dataframe, ["tempo", "loudness"])
-    dataframe = dataframe.agg("mean")
+    dataframe = dataframe.drop(["end_time", "song_id"], axis=1).agg("mean")
 
     fig = go.Figure(go.Scatterpolar(
         name = "Your songs with highest:",

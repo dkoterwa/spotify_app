@@ -53,6 +53,7 @@ def upload_file():
 def general_statistics():
     sp = connect_to_sp(cid, secret)
     user_id = session.get("unique_id")
+    print("ID", user_id)
     scatter = make_general_scatter(user_id) # Create scatterplot
     heatmap = make_general_heatmap(user_id) # Create heatmap
     graph1JSON = json.dumps(scatter, cls=plotly.utils.PlotlyJSONEncoder) 
